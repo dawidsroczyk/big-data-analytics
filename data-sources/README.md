@@ -22,7 +22,7 @@
 | PORT                | Port to bind                                | 8000                                 |
 | TRAFFIC_PROVIDER    | Traffic provider (`mock`, `tomtom`)         | mock                                 |
 | TRAFFIC_API_KEY     | API key for traffic provider                | your-traffic-api-key                 |
-| TRAFFIC_BASE_URL    | Base URL for traffic API                    | https://api.tomtom.com/traffic       |
+| TRAFFIC_BASE_URL    | Base URL for traffic API                    | https://api.tomtom.com       |
 | TRAFFIC_TIMEOUT     | Timeout for traffic API (seconds)           | 30                                   |
 | WEATHER_PROVIDER    | Weather provider (`mock`)                   | mock                                 |
 | WEATHER_API_KEY     | API key for weather provider                | your-weather-api-key                 |
