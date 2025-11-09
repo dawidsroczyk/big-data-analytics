@@ -47,3 +47,26 @@ docker-compose up --build
 ```
 
 This will use the settings from your `.env` file.
+
+
+---
+
+## Example API Usage
+
+### Health Check
+
+```bash
+curl "http://localhost:8000/api/v1/health"
+```
+
+### Traffic Data
+
+```bash
+curl "http://localhost:8000/api/v1/traffic?lat=40.7128&lng=-74.0060"
+```
+
+### Weather Data
+
+```bash
+curl "http://localhost:8000/api/v1/weather?lat=40.7128&lng=-74.0060"
+```
