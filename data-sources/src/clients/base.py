@@ -15,10 +15,6 @@ class BaseTrafficClient(ABC):
     @abstractmethod
     async def get_traffic_flow(self, lat: float, lng: float, radius: int = 1000) -> Dict[str, Any]:
         pass
-    
-    @abstractmethod
-    async def get_incidents(self, lat: float, lng: float, radius: int = 5000) -> Dict[str, Any]:
-        pass
 
 class BaseWeatherClient(ABC):
     def __init__(self, config: ClientConfig):

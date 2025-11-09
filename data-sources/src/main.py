@@ -12,7 +12,6 @@ def create_application() -> FastAPI:
         version="1.0.0"
     )
     
-    # CORS middleware
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -21,7 +20,6 @@ def create_application() -> FastAPI:
         allow_headers=["*"],
     )
     
-    # Include routers
     app.include_router(traffic.router, prefix="/api/v1", tags=["traffic"])
     app.include_router(weather.router, prefix="/api/v1", tags=["weather"])
     app.include_router(health.router, prefix="/api/v1", tags=["health"])

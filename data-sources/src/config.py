@@ -1,31 +1,40 @@
 from pydantic_settings import BaseSettings
+from pydantic import Field, ConfigDict
+from typing import Optional
+import os
 
 class TrafficClientConfig(BaseSettings):
-    provider: str = "mock"  # tomtom, mock
-    api_key: str = ""
-    base_url: str = ""
-    timeout: int = 30
+    provider: str = Field(..., description="Traffic provider (tomtom, mock)")
+    api_key: str = Field(..., description="API key for traffic service")
+    base_url: str = Field(..., description="Base URL for traffic API")
+    timeout: int = Field(default=30, description="Timeout in seconds")
     
-    class Config:
-        env_prefix = "TRAFFIC_"
+    model_config = ConfigDict(env_prefix="TRAFFIC_")
 
 class WeatherClientConfig(BaseSettings):
-    provider: str = "mock"  # mock (add more later)
-    api_key: str = ""
-    base_url: str = ""
-    timeout: int = 30
+    provider: str = Field(..., description="Weather provider (mock)")
+    api_key: str = Field(..., description="API key for weather service")
+    base_url: str = Field(..., description="Base URL for weather API")
+    timeout: int = Field(default=30, description="Timeout in seconds")
     
-    class Config:
-        env_prefix = "WEATHER_"
+    model_config = ConfigDict(env_prefix="WEATHER_")
 
 class AppConfig(BaseSettings):
-    app_name: str = "API Service"
-    debug: bool = False
-    host: str = "0.0.0.0"
-    port: int = 8000
+    app_name: str = Field(..., description="Application name")
+    debug: bool = Field(default=False, description="Debug mode")
+    host: str = Field(default="0.0.0.0", description="Host to bind")
+    port: int = Field(default=8000, description="Port to bind")
     
-    traffic: TrafficClientConfig = TrafficClientConfig()
-    weather: WeatherClientConfig = WeatherClientConfig()
+    traffic: Optional[TrafficClientConfig] = None
+    weather: Optional[WeatherClientConfig] = None
 
 def get_config():
-    return AppConfig()
+    traffic_config = TrafficClientConfig()
+    weather_config = WeatherClientConfig()
+    
+    app_config = AppConfig(
+        traffic=traffic_config,
+        weather=weather_config
+    )
+
+    return app_config

@@ -24,7 +24,7 @@ class Container(containers.DeclarativeContainer):
         timeout=config.provided.weather.timeout
     )
     
-    # Client factories (fix: resolve provider value at runtime)
+    # Client factories
     traffic_client = providers.Singleton(
         create_traffic_client,
         provider=providers.Callable(lambda c: c.traffic.provider, config),
