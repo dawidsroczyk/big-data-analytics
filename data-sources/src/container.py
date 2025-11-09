@@ -1,5 +1,6 @@
 from dependency_injector import containers, providers
-from .config import get_config, ClientConfig
+from .config import get_config
+from .clients.base import ClientConfig
 from .clients.traffic import create_traffic_client
 from .clients.weather import create_weather_client
 from .repositories.traffic import TrafficRepository
@@ -23,16 +24,16 @@ class Container(containers.DeclarativeContainer):
         timeout=config.provided.weather.timeout
     )
     
-    # Client factories
+    # Client factories (fix: resolve provider value at runtime)
     traffic_client = providers.Singleton(
         create_traffic_client,
-        provider=config.provided.traffic.provider,
+        provider=providers.Callable(lambda c: c.traffic.provider, config),
         config=traffic_client_config
     )
     
     weather_client = providers.Singleton(
         create_weather_client,
-        provider=config.provided.weather.provider,
+        provider=providers.Callable(lambda c: c.weather.provider, config),
         config=weather_client_config
     )
     

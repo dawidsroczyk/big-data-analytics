@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List
-from .base import BaseAPIClient
+from ..clients.base import BaseTrafficClient
 
 @dataclass
 class TrafficInfo:
@@ -13,7 +13,7 @@ class TrafficInfo:
     data_provider: str
 
 class TrafficRepository:
-    def __init__(self, traffic_client: BaseAPIClient):
+    def __init__(self, traffic_client: BaseTrafficClient):
         self.client = traffic_client
     
     async def get_traffic_conditions(self, lat: float, lng: float) -> TrafficInfo:

@@ -1,8 +1,8 @@
 import httpx
-from ..base import BaseAPIClient, ClientConfig
+from ..base import BaseTrafficClient, ClientConfig
 from typing import Dict, Any
 
-class TomTomTrafficClient(BaseAPIClient):
+class TomTomTrafficClient(BaseTrafficClient):
     """TomTom Traffic API implementation"""
     
     async def get_traffic_flow(self, lat: float, lng: float, radius: int = 1000) -> Dict[str, Any]:

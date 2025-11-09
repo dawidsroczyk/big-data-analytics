@@ -1,10 +1,10 @@
 import asyncio
 import random
 from datetime import datetime
-from ..base import BaseAPIClient, ClientConfig
+from ..base import BaseTrafficClient, ClientConfig
 from typing import Dict, Any
 
-class MockTrafficClient(BaseAPIClient):
+class MockTrafficClient(BaseTrafficClient):
     """Mock traffic data for development and testing"""
     
     async def get_traffic_flow(self, lat: float, lng: float, radius: int = 1000) -> Dict[str, Any]:

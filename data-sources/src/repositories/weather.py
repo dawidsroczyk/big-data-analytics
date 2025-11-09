@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List
-from clients.base import BaseWeatherClient
+from ..clients.base import BaseWeatherClient
 
 @dataclass
 class WeatherInfo:
@@ -29,4 +29,3 @@ class WeatherRepository:
             updated_at=datetime.now(),
             data_provider=data.get('provider', 'unknown')
         )
-    
