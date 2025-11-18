@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<configuration>
+
+    <!-- ⭐ Ustawiamy YARN jako framework wykonywania zadań -->
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+        <!--
+            Bez tego Spark NA YARN nie zadziała poprawnie.
+            (Spark korzysta z "mapreduce" tylko jako API do YARN)
+        -->
+    </property>
+
+    <!-- 📁 Gdzie zapisywać logi jobów / historię zadań -->
+    <property>
+        <name>mapreduce.jobhistory.address</name>
+        <value>historyserver:10020</value>
+    </property>
+
+    <!-- Pan doradxa uywać-->
+    <property>
+        <name>mapreduce.jobhistory.webapp.address</name>
+        <value>historyserver:19888</value>
+        <!--
+            Dashboard z historią jobów:
+            http://localhost:19888
+        -->
+    </property>
+
+    <!-- ⭐ WYMAGANE dla Sparka: środowisko uruchomieniowe w kontenerze -->
+    <property>
+        <name>yarn.app.mapreduce.am.env</name>
+        <value>HADOOP_MAPRED_HOME=$HADOOP_HOME</value>
+    </property>
+
+    <property>
+        <name>mapreduce.map.env</name>
+        <value>HADOOP_MAPRED_HOME=$HADOOP_HOME</value>
+    </property>
+
+    <property>
+        <name>mapreduce.reduce.env</name>
+        <value>HADOOP_MAPRED_HOME=$HADOOP_HOME</value>
+        <!--
+            W Dockerze kontenery Map/Reduce nie mają właściwego środowiska,
+            więc trzeba im przekazać HADOOP_HOME — inaczej Spark nie odpali tasków.
+        -->
+    </property>
+
+    <!-- ⚙ Limit pamięci tasków MapReduce — Spark też to respektuje -->
+    <property>
+        <name>mapreduce.map.memory.mb</name>
+        <value>1024</value>
+    </property>
+
+    <property>
+        <name>mapreduce.reduce.memory.mb</name>
+        <value>2048</value>
+    </property>
+
+    <!-- 💾 Shuffle buffer (ważne przy streamingu!) -->
+    <property>
+        <name>mapreduce.task.io.sort.mb</name>
+        <value>256</value>
+        <!--
+            Większy bufor = mniejsze opóźnienia przy dużej ilości mikrotasków
+            generowanych przez Spark Streaming.
+        -->
+    </property>
+
+</configuration>

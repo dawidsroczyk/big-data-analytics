@@ -27,3 +27,20 @@ class BaseWeatherClient(ABC):
     @abstractmethod
     async def get_forecast(self, lat: float, lng: float, days: int = 5) -> Dict[str, Any]:
         pass
+
+class BaseAirClient:
+    """Base class for air pollution clients.
+
+    Accepts a `ClientConfig` instance for consistency with other clients.
+    """
+    def __init__(self, config: ClientConfig):
+        # Accept either a ClientConfig or a dict-like object with the same attributes
+        if isinstance(config, ClientConfig):
+            self.api_key = config.api_key
+            self.base_url = config.base_url.rstrip("/")
+            self.timeout = config.timeout
+        else:
+            # fallback: try attribute access for compatibility
+            self.api_key = getattr(config, "api_key")
+            self.base_url = getattr(config, "base_url").rstrip("/")
+            self.timeout = getattr(config, "timeout", 30)

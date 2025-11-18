@@ -19,6 +19,14 @@ class WeatherClientConfig(BaseSettings):
     
     model_config = ConfigDict(env_prefix="WEATHER_")
 
+class AirPollutionConfig(BaseSettings):
+    provider: str = Field(..., description="Air pollution data provider")
+    api_key: str = Field(..., description="API key for air pollution service")
+    base_url: str = Field(..., description="Base URL for air pollution API")
+    timeout: int = Field(default=30, description="Timeout in seconds")
+
+    model_config = ConfigDict(env_prefix="AIR_POLLUTION_")
+
 class AppConfig(BaseSettings):
     app_name: str = Field(..., description="Application name")
     debug: bool = Field(default=False, description="Debug mode")
@@ -27,14 +35,22 @@ class AppConfig(BaseSettings):
     
     traffic: Optional[TrafficClientConfig] = None
     weather: Optional[WeatherClientConfig] = None
+    air_pollution: Optional[AirPollutionConfig] = None
+
+    model_config = ConfigDict(env_prefix="")  # allow APP_NAME, DEBUG etc.
+
+
+
 
 def get_config():
+    
     traffic_config = TrafficClientConfig()
     weather_config = WeatherClientConfig()
-    
-    app_config = AppConfig(
-        traffic=traffic_config,
-        weather=weather_config
-    )
+    air_pollution_config = AirPollutionConfig()
 
-    return app_config
+    return AppConfig(
+        traffic=traffic_config,
+        weather=weather_config,
+        air_pollution=air_pollution_config
+    )
+    # previously there was an unreachable `return app_config` here; removed

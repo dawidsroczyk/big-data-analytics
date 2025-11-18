@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<configuration>
+
+    <!-- 🔥 Ile maksymalnie aplikacji może działać -->
+    <property>
+        <name>yarn.scheduler.capacity.maximum-applications</name>
+        <value>10000</value>
+        <!--
+            Duża liczba — Spark Streaming generuje wiele małych aplikacji
+            (np. restart AM lub batch'y).
+        -->
+    </property>
+
+    <!-- 🔥 Maksymalny udział zasobów przez ApplicationMaster -->
+    <property>
+        <name>yarn.scheduler.capacity.maximum-am-resource-percent</name>
+        <value>0.1</value>
+        <!--
+            10% klastra może być AM-kami.
+            Reszta na executory Sparka (ważne!).
+        -->
+    </property>
+
+    <!-- 🔢 Jak liczone są zasoby -->
+    <property>
+        <name>yarn.scheduler.capacity.resource-calculator</name>
+        <value>org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator</value>
+    </property>
+
+    <!-- 🧵 Kolejki na najwyższym poziomie -->
+    <property>
+        <name>yarn.scheduler.capacity.root.queues</name>
+        <value>default</value>
+        <!--
+            Masz tylko 1 kolejkę → prosto i stabilnie dla demo.
+        -->
+    </property>
+
+    <!-- 🎯 Cała pojemność klastra w kolejce default -->
+    <property>
+        <name>yarn.scheduler.capacity.root.default.capacity</name>
+        <value>100</value>
+        <!--
+            Default ma 100% zasobów klastra.
+        -->
+    </property>
+
+    <property>
+        <name>yarn.scheduler.capacity.root.default.maximum-capacity</name>
+        <value>100</value>
+    </property>
+
+    <!-- 👤 Ile zasobów może zająć jeden użytkownik -->
+    <property>
+        <name>yarn.scheduler.capacity.root.default.user-limit-factor</name>
+        <value>1</value>
+        <!--
+            Jeden user może zająć 100% zasobów.
+            Idealne dla Waszego klastra demo.
+        -->
+    </property>
+
+    <!-- 🟢 Kolejka jest aktywna -->
+    <property>
+        <name>yarn.scheduler.capacity.root.default.state</name>
+        <value>RUNNING</value>
+    </property>
+
+    <!-- 🔓 Kto może submitować aplikacje? Każdy. -->
+    <property>
+        <name>yarn.scheduler.capacity.root.default.acl_submit_applications</name>
+        <value>*</value>
+    </property>
+
+    <property>
+        <name>yarn.scheduler.capacity.root.default.acl_administer_queue</name>
+        <value>*</value>
+    </property>
+
+    <!-- ⚡ Opóźnienie lokalności danych (ważne przy streamingach) -->
+    <property>
+        <name>yarn.scheduler.capacity.node-locality-delay</name>
+        <value>40</value>
+        <!--
+            Spark będzie próbował uruchamiać taski na tym DataNode,
+            gdzie są dane → mniejsze opóźnienia.
+        -->
+    </property>
+
+    <!-- 🔌 Wyłączone mapowania użytkowników do kolejek -->
+    <property>
+        <name>yarn.scheduler.capacity.queue-mappings</name>
+        <value></value>
+    </property>
+
+    <property>
+        <name>yarn.scheduler.capacity.queue-mappings-override.enable</name>
+        <value>false</value>
+    </property>
+
+</configuration>

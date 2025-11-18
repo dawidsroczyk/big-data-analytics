@@ -1,11 +1,14 @@
 #!/bin/bash
-# Wait for HDFS
-until hdfs dfsadmin -report 2>/dev/null; do
-    sleep 5
-done
+# Ten skrypt tworzy katalogi medallion w HDFS
 
+set -e
+
+# Utwórz katalogi w HDFS
 hdfs dfs -mkdir -p /bronze/raw
-hdfs dfs -mkdir -p /silver/cleaned  
+hdfs dfs -mkdir -p /silver/cleaned
 hdfs dfs -mkdir -p /gold/business
 
-echo "Medallion architecture created: /bronze /silver /gold"
+echo "Medallion architecture created successfully:"
+echo "/bronze/raw"
+echo "/silver/cleaned"
+echo "/gold/business"

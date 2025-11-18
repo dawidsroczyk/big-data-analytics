@@ -10,6 +10,7 @@ async def health_check():
         "status": "healthy",
         "data_sources": {
             "traffic": config.traffic.provider,
-            "weather": config.weather.provider
+            "weather": config.weather.provider,
+            "air_pollution": config.air_pollution.provider
         }
     }

@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<configuration>
+
+    <!-- 🔥 Najważniejsze: ile kopii każdego bloku -->
+    <property>
+        <name>dfs.replication</name>
+        <value>3</value>
+        <!--
+            Spark Streaming zapisuje checkpointy i dane w małych porcjach.
+            Replikacja 3 = pełna odporność przy awarii 1 DataNode,
+            idealne do demonstracji wysokiej dostępności.
+        -->
+    </property>
+
+    <!-- 📁 Gdzie NameNode zapisuje metadane (musi być volume w Dockerze!) -->
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>file:///hadoop/dfs/name</value>
+        <!--
+            BEZWZGLĘDNIE wymagane.
+            NameNode tu trzyma informacje o katalogach, plikach i blokach.
+            W Dockerze montujemy to jako volume, inaczej dane znikną przy restarcie.
+        -->
+    </property>
+
+    <!-- 📁 Gdzie DataNode trzyma blokowe dane (również powinien być volume) -->
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>file:///hadoop/dfs/data</value>
+        <!--
+            Każdy DataNode ma własny katalog.
+            Jeśli masz 3 DataNode’y → każdy dostaje inny katalog.
+        -->
+    </property>
+
+    <!-- 🔗 Adres NameNode do RPC (musi zgadzać się z core-site.xml i docker-compose) -->
+    <property>
+        <name>dfs.namenode.rpc-address</name>
+        <value>namenode:8020</value>
+    </property>
+
+    <!-- 🌐 Adres HTTP UI NameNode -->
+    <property>
+        <name>dfs.namenode.http-address</name>
+        <value>namenode:9870</value>
+        <!--
+            Pod adresem http://localhost:9870 zobaczysz:
+            - listę DataNode’ów,
+            - repliki,
+            - katalogi HDFS,
+            - informacje o stanie klastra.
+        -->
+    </property>
+
+    <!-- 🚫 Wyłączamy permissions — Docker i YARN mają różne user id -->
+    <property>
+        <name>dfs.permissions.enabled</name>
+        <value>false</value>
+        <!--
+            Bez tego często DataNode’y nie mogą zapisywać bloków → błędy "permission denied".
+        -->
+    </property>
+
+    <!-- ❤️ DataNode wysyła heartbeat co 3 sekundy (pan doradził jednak 5) -->
+    <property>
+        <name>dfs.heartbeat.interval</name>
+        <value>5</value>
+        <!--
+            Bardzo dobre dla real-time streamingu:
+            szybciej wykrywamy awarie i replikujemy bloki.
+        -->
+    </property>
+
+    <!-- 🧠 Jak szybko NameNode weryfikuje opóźnione heartbeaty -->
+    <property>
+        <name>dfs.namenode.heartbeat.recheck-interval</name>
+        <value>30000</value> <!-- 30 sekund -->
+        <!--
+            Jeśli DataNode nagle jest przeciążony,
+            NameNode szybciej zauważy, że jest stale.
+        -->
+    </property>
+
+    <!-- ⚡ Wątków do obsługi RPC przez NameNode (więcej = wyższa przepustowość) -->
+    <property>
+        <name>dfs.namenode.handler.count</name>
+        <value>50</value>
+        <!--
+            Spark Streaming produkuje wiele małych operacji metadanych.
+            Więcej wątków RPC = NameNode się nie dławi.
+        -->
+    </property>
+
+    <!-- ⚡ DataNode może obsłużyć dużo równoległych transferów bloków -->
+    <property>
+        <name>dfs.datanode.max.transfer.threads</name>
+        <value>4096</value>
+        <!--
+            Przy replikacji 3 i strumieniowym dopisywaniu bloków
+            DataNode musi wysyłać dane jednocześnie do wielu replik.
+        -->
+    </property>
+
+    <!-- 🩹 Krytyczne w Dockerze: IGNORUJ CHECK HOSTNAME/IP -->
+    <property>
+        <name>dfs.namenode.datanode.registration.ip-hostname-check</name>
+        <value>false</value>
+        <!--
+            Bez tego DataNode’y potrafią odrzucać rejestrację
+            gdy Docker zmieni IP lub kolejność startu kontenerów.
+        -->
+    </property>
+
+    <!-- 🧱 Nie pozwól DataNode zejść na 0 GB miejsca (chroni przed crashami) -->
+    <property>
+        <name>dfs.datanode.du.reserved</name>
+        <value>1073741824</value> <!-- 1 GB -->
+    </property>
+
+</configuration>

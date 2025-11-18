@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<configuration>
+
+    <!-- ⭐ Najważniejsze: ResourceManager -->
+    <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>resourcemanager</value>
+        <!--
+            Nazwa hosta musi być taka jak kontener w docker-compose.
+        -->
+    </property>
+
+    <!-- 📡 Porty RM -->
+    <property>
+        <name>yarn.resourcemanager.address</name>
+        <value>resourcemanager:8032</value>
+    </property>
+
+    <property>
+        <name>yarn.resourcemanager.scheduler.address</name>
+        <value>resourcemanager:8030</value>
+    </property>
+
+    <property>
+        <name>yarn.resourcemanager.resource-tracker.address</name>
+        <value>resourcemanager:8031</value>
+    </property>
+
+    <!-- 🎛 UI ResourceManager -->
+    <property>
+        <name>yarn.resourcemanager.webapp.address</name>
+        <value>resourcemanager:8088</value>
+    </property>
+
+    <!-- ⭐ NodeManager podstawowe -->
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+        <!--
+            Wymagane dla Spark + MapReduce shuffle.
+        -->
+    </property>
+
+    <!-- 🛑 Bardzo ważne w Dockerze: wyłączamy memory-checki -->
+    <property>
+        <name>yarn.nodemanager.vmem-check-enabled</name>
+        <value>false</value>
+        <!--
+            Docker != realny system memory cgroup → YARN zabija wszystkie kontenery.
+            Wyłączamy, bo inaczej Spark Streaming padnie po kilku minutach.
+        -->
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.pmem-check-enabled</name>
+        <value>false</value>
+        <!--
+            To samo dla fizycznej pamięci.
+        -->
+    </property>
+
+    <!-- 💾 Domyślne limity pamięci kontenerów -->
+    <property>
+        <name>yarn.scheduler.maximum-allocation-mb</name>
+        <value>4096</value>  <!-- 4 GB  na kadego -->
+    </property>
+
+    <property>
+        <name>yarn.scheduler.minimum-allocation-mb</name>
+        <value>256</value>
+    </property>
+
+    <!-- ⚙ Domyślne CPU dla kontenerów -->
+    <property>
+        <name>yarn.scheduler.minimum-allocation-vcores</name>
+        <value>1</value>
+    </property>
+
+    <property>
+        <name>yarn.scheduler.maximum-allocation-vcores</name>
+        <value>2</value>
+    </property>
+
+    <!-- ⭐ Bardzo ważne dla Spark Streaming: nie ubijaj aplikacji po pauzie -->
+    <property>
+        <name>yarn.resourcemanager.am.max-attempts</name>
+        <value>10</value>
+        <!--
+            Spark Streaming AM może się restartować przy restarcie kafki.
+            10 prób = demo nie padnie.
+        -->
+    </property>
+
+    <!-- 🔄 Restart NM w Dockerze → nie gubimy statusu aplikacji -->
+    <property>
+        <name>yarn.resourcemanager.recovery.enabled</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>yarn.resourcemanager.store.class</name>
+        <value>org.apache.hadoop.yarn.server.resourcemanager.recovery.FileSystemRMStateStore</value>
+    </property>
+
+    <property>
+        <name>yarn.resourcemanager.fs.state-store.uri</name>
+        <value>hdfs://namenode:8020/rmstate</value>
+    </property>
+
+    <!-- 🩹 NodeManager: opóźnienie usuwania logów (debugging w demo) -->
+    <property>
+        <name>yarn.nodemanager.delete.debug-delay-sec</name>
+        <value>600</value>
+        <!--
+            10 minut na podejrzenie logów — super przy demo i nauce.
+        -->
+    </property>
+
+    <!-- 🚀 Najważniejsze do streamingu: 
+         Spark potrzebuje dużych buforów shuffle -->
+    <property>
+        <name>yarn.nodemanager.resource.memory-mb</name>
+        <value>4092</value> <!-- 1gb = 1024-->
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.resource.cpu-vcores</name>
+        <value>2</value>
+    </property>
+
+</configuration>

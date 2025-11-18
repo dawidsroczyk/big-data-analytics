@@ -1,7 +1,11 @@
 #!/bin/bash
-until docker exec $(docker ps -q -f name=namenode) hdfs dfsadmin -report 2>/dev/null; do
+# Czekaj aż NameNode wystartuje i będzie gotowy
+echo "Waiting for NameNode to be ready..."
+until docker exec namenode hdfs dfsadmin -report 2>/dev/null; do
     sleep 5
 done
 
-docker exec $(docker ps -q -f name=namenode) /opt/hadoop/init-hdfs.sh
-echo "Bronze/silver/gold layers created"
+# Uruchom inicjalizację HDFS (tworzenie katalogów medallion)
+docker exec namenode /opt/hadoop/init-hdfs.sh
+
+echo "Bronze / Silver / Gold layers have been created in HDFS!"
