@@ -1,3 +1,4 @@
+version: '3.8'
 services:
    namenode:
       image: apache/hadoop:3
@@ -11,24 +12,32 @@ services:
           ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
       volumes:
         - ./init-hdfs.sh:/opt/hadoop/init-hdfs.sh
+      networks:
+        - big-data-network
    datanode1:
       image: apache/hadoop:3
       command: ["hdfs", "datanode"]
       hostname: datanode1
       env_file:
         - ./config      
+      networks:
+        - big-data-network
    datanode2:
       image: apache/hadoop:3
       command: ["hdfs", "datanode"]
       hostname: datanode2
       env_file:
         - ./config
+      networks:
+        - big-data-network
    datanode3:
       image: apache/hadoop:3
       command: ["hdfs", "datanode"]
       hostname: datanode3
       env_file:
         - ./config    
+      networks:
+        - big-data-network
    resourcemanager:
       image: apache/hadoop:3
       hostname: resourcemanager
@@ -39,9 +48,17 @@ services:
         - ./config
       volumes:
         - ./test.sh:/opt/test.sh
+      networks:
+        - big-data-network
    nodemanager:
       image: apache/hadoop:3
       command: ["yarn", "nodemanager"]
       env_file:
         - ./config
+      networks:
+        - big-data-network
+
+networks:
+  big-data-network:
+    external: true
 
