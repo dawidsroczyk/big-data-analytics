@@ -8,8 +8,11 @@ services:
     environment:
       - NIFI_WEB_HTTPS_PORT=8443
       - NIFI_SENSITIVE_PROPS_KEY=minimalnifikey1234567890
+      - HADOOP_CONF_DIR=/opt/nifi/nifi-current/conf/hadoop-conf
+      - HADOOP_USER_NAME=root
     volumes:
       - nifi_data:/opt/nifi/nifi-current
+      - ./hadoop-conf:/opt/nifi/nifi-current/conf/hadoop-conf:ro
     networks:
       - big-data-network
 
@@ -19,4 +22,3 @@ volumes:
 networks:
   big-data-network:
     external: true
-    
