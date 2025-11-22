@@ -2,6 +2,7 @@ package preprocessing.transform
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.expressions.Window
 
 object TrafficPreprocessor {
 
@@ -20,7 +21,6 @@ object TrafficPreprocessor {
       )
       .withColumn("event_date", to_date(col("event_ts")))
       .withColumn("event_hour", hour(col("event_ts")))
-
       .withColumn("current_travel_time",   col("current_travel_time").cast("long"))
       .withColumn("free_flow_speed",       col("free_flow_speed").cast("double"))
       .withColumn("free_flow_travel_time", col("free_flow_travel_time").cast("long"))
@@ -30,10 +30,37 @@ object TrafficPreprocessor {
     val cleaned = df
       .filter(col("event_ts").isNotNull)
       .filter(col("lat").isNotNull && col("lon").isNotNull)
+      .filter(col("current_travel_time")   >= 0 || col("current_travel_time").isNull)
+      .filter(col("free_flow_travel_time") >= 0 || col("free_flow_travel_time").isNull)
+      .filter(col("free_flow_speed")       >= 0 || col("free_flow_speed").isNull)
+      .dropDuplicates("lat", "lon", "event_ts")
+
+    val locWindow = Window.partitionBy("lat", "lon")
+
+    val enriched = cleaned
+      .withColumn(
+        "current_travel_time_imputed",
+        coalesce(
+          col("current_travel_time"),
+          expr("percentile_approx(current_travel_time, 0.5) over (partition by lat, lon)")
+        )
+      )
+      .withColumn(
+        "congestion_index",
+        col("current_travel_time_imputed") / col("free_flow_travel_time_imputed")
+      )
+      .withColumn(
+        "delay_seconds",
+        col("current_travel_time_imputed") - col("free_flow_travel_time_imputed")
+      )
+      .withColumn(
+        "is_congested",
+        col("congestion_index") > 1.2
+      )
 
     println("=== TrafficPreprocessor: SILVER sample ===")
-    cleaned.show(5, truncate = false)
+    enriched.show(5, truncate = false)
 
-    cleaned
+    enriched
   }
 }

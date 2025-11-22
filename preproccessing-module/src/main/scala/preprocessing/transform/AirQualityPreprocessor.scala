@@ -3,10 +3,10 @@ package preprocessing.transform
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
-object WeatherPreprocessor {
+object AirQualityPreprocessor {
 
   def transform(raw: DataFrame): DataFrame = {
-    println("=== WeatherPreprocessor: RAW schema ===")
+    println("=== AirQualityPreprocessor: RAW schema ===")
     raw.printSchema()
 
     val locSplit = split(col("location"), ",")
@@ -20,23 +20,21 @@ object WeatherPreprocessor {
       )
       .withColumn("event_date", to_date(col("event_ts")))
       .withColumn("event_hour", hour(col("event_ts")))
-      .withColumn("temperature", col("temperature").cast("double"))
-      .withColumn("humidity", col("humidity").cast("double"))
-      .withColumn("wind_speed", col("wind_speed").cast("double"))
-      .withColumn("conditions", col("conditions").cast("string"))
+      .withColumn("aqi", col("aqi").cast("double"))
+      .withColumn("pm25", col("pm25").cast("double"))
+      .withColumn("pm10", col("pm10").cast("double"))
+      .withColumn("no2",  col("no2").cast("double"))
+      .withColumn("so2",  col("so2").cast("double"))
+      .withColumn("o3",   col("o3").cast("double"))
+      .withColumn("co",   col("co").cast("double"))
+      .withColumn("nh3",  col("nh3").cast("double"))
       .withColumn("data_provider", col("data_provider").cast("string"))
 
     val cleaned = df
       .filter(col("event_ts").isNotNull)
       .filter(col("lat").isNotNull && col("lon").isNotNull)
-      // sanity checks na zakresach (przykładowe widełki)
-      .filter(col("temperature").between(-40, 60) || col("temperature").isNull)
-      .filter(col("humidity").between(0, 100) || col("humidity").isNull)
-      .filter(col("wind_speed") >= 0 || col("wind_speed").isNull)
-      // deduplikacja po (lat, lon, event_ts)
-      .dropDuplicates("lat", "lon", "event_ts")
 
-    println("=== WeatherPreprocessor: CLEANED sample ===")
+    println("=== AirQualityPreprocessor: SILVER sample ===")
     cleaned.show(5, truncate = false)
 
     cleaned
