@@ -2,7 +2,7 @@ package preprocessing.config
 
 final case class PreprocessingConfig(
                                     rawBasePath: String,
-                                    silverBasePath: String
+                                    silverBasePath: String,
                                     )
 
 object PreprocessingConfig {
