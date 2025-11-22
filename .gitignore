@@ -217,3 +217,8 @@ __marimo__/
 
 # Hadoop docker compose
 hdfs/test.sh/
+
+# Keep NiFi Registry serialized flows
+!nifi/registry-data/flow_storage/
+!nifi/registry-data/database/
+!nifi/registry-data/git/

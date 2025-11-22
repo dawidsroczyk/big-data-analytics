@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<configuration>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://namenode:8020</value>
+  </property>
+  <!-- Added legacy name for some Hadoop client lookups -->
+  <property>
+    <name>fs.default.name</name>
+    <value>hdfs://namenode:8020</value>
+  </property>
+</configuration>
