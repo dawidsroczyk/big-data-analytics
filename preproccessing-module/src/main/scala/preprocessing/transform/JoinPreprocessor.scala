@@ -18,11 +18,12 @@ object JoinPreprocessor {
         t,
         expr(
           """
-        w.lat = t.lat AND
-        w.lon = t.lon AND
-        t.event_ts BETWEEN w.event_ts - INTERVAL 2 MINUTES
-                       AND     w.event_ts + INTERVAL 2 MINUTES
-      """),
+          w.lat = t.lat AND
+          w.lon = t.lon AND
+          t.event_ts BETWEEN w.event_ts - INTERVAL 2 MINUTES
+                         AND     w.event_ts + INTERVAL 2 MINUTES
+        """
+        ),
         "inner"
       ).select(
         col("w.lat"),
@@ -47,10 +48,47 @@ object JoinPreprocessor {
       )
       .dropDuplicates("lat", "lon", "event_ts")
 
-    println("=== JoinPreprocessor: JOINED schema ===")
+    println("=== JoinPreprocessor: JOINED sample ===")
     joined.show(10, truncate = false)
 
     joined
   }
 
+  /** Do GOLD – doda label z air quality */
+  def attachAirQuality(
+                        features: DataFrame,
+                        air: DataFrame
+                      ): DataFrame = {
+    val f = features.alias("f")
+    val a = air.alias("a")
+
+    val withLabel = f.join(
+      a,
+      expr(
+        """
+          f.lat = a.lat AND
+          f.lon = a.lon AND
+          a.event_ts BETWEEN f.event_ts - INTERVAL 2 MINUTES
+                         AND     f.event_ts + INTERVAL 2 MINUTES
+        """
+      ),
+      "left"
+    ).select(
+      col("f.*"),
+      col("a.aqi").as("label_aqi"),
+      col("a.pm25"),
+      col("a.pm10"),
+      col("a.no2"),
+      col("a.so2"),
+      col("a.o3"),
+      col("a.co"),
+      col("a.nh3"),
+      col("a.data_provider").as("air_provider")
+    )
+
+    println("=== JoinPreprocessor: FEATURES + LABEL sample ===")
+    withLabel.show(10, truncate = false)
+
+    withLabel
+  }
 }
