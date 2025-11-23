@@ -17,10 +17,15 @@ class AirPollutionResponse(BaseModel):
     data_provider: str
 
 @router.get("/air_pollution", response_model=AirPollutionResponse)
-async def get_air_pollution(lat: float, lon: float):
+async def get_air_pollution(lat: float, lng: float = None, lon: float = None):
     try:
+        # accept either 'lng' or 'lon' query param (NiFi may send 'lng')
+        longitude = lon if lon is not None else lng
+        if longitude is None:
+            raise ValueError("Missing longitude parameter (provide 'lon' or 'lng')")
+
         repo = container.air_pollution_repository()
-        pollution_info = await repo.get_current_air_pollution(lat, lon)
+        pollution_info = await repo.get_current_air_pollution(lat, longitude)
         return AirPollutionResponse(
             location=pollution_info.location,
             aqi=pollution_info.aqi,

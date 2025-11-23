@@ -4,9 +4,11 @@ from .clients.base import ClientConfig
 from .clients.traffic import create_traffic_client
 from .clients.weather import create_weather_client
 from .clients.air_pollutions import create_air_pollution_client
+from .clients.uv import create_uv_client
 from .repositories.traffic import TrafficRepository
 from .repositories.weather import WeatherRepository
 from .repositories.air_pollutions import AirPollutionRepository
+from .repositories.uv import UVRepository
 
 class Container(containers.DeclarativeContainer):
     config = providers.Singleton(get_config)
@@ -32,6 +34,13 @@ class Container(containers.DeclarativeContainer):
         base_url=config.provided.air_pollution.base_url,
         timeout=config.provided.air_pollution.timeout
     )
+
+    uv_client_config = providers.Singleton(
+        ClientConfig,
+        api_key=config.provided.uv.api_key,
+        base_url=config.provided.uv.base_url,
+        timeout=config.provided.uv.timeout
+    )
     
     # Client factories
     traffic_client = providers.Singleton(
@@ -51,6 +60,12 @@ class Container(containers.DeclarativeContainer):
         provider=providers.Callable(lambda c: c.air_pollution.provider, config),
         config=air_pollution_client_config
     )
+
+    uv_client = providers.Singleton(
+        create_uv_client,
+        provider=providers.Callable(lambda c: c.uv.provider, config),
+        config=uv_client_config
+    )
     
     # Repositories
     traffic_repository = providers.Factory(
@@ -66,6 +81,11 @@ class Container(containers.DeclarativeContainer):
     air_pollution_repository = providers.Factory(
         AirPollutionRepository,
         air_pollution_client=air_pollution_client
+    )
+    
+    uv_repository = providers.Factory(
+        UVRepository,
+        uv_client=uv_client
     )
 
 container = Container()

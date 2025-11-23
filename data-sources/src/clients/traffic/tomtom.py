@@ -26,5 +26,6 @@ class TomTomTrafficClient(BaseTrafficClient):
                 "free_flow_travel_time": fsd.get("freeFlowTravelTime"),
                 "road_closure": fsd.get("roadClosure"),
                 "location": f"{lat},{lng}",
-                "provider": "tomtom"
+                "provider": "tomtom",
+                "timestamp": fsd.get("timestamp") 
             }

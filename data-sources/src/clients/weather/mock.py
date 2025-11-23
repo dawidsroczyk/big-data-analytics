@@ -18,7 +18,9 @@ class MockWeatherClient(BaseWeatherClient):
             "wind_speed": round(random.uniform(0, 25), 1),
             "pressure": random.randint(980, 1030),
             "location": f"{lat},{lng}",
-            "timestamp": datetime.now().isoformat(),
+                    # ADD THIS → same format as real APIs
+            "dt": int(now.timestamp()),              # UNIX timestamp
+            "timestamp": now.isoformat(),            # optional, human readable
             "provider": "mock"
         }
     
