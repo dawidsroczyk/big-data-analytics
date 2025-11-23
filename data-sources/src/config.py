@@ -29,6 +29,14 @@ class AirPollutionClientConfig(BaseSettings):
 
     model_config = ConfigDict(env_prefix="AIR_POLLUTION_")
 
+class UVClientConfig(BaseSettings):
+    provider: str = Field(..., description="UV provider (mock, openweathermap)")
+    api_key: str = Field(..., description="API key for UV index service")
+    base_url: str = Field(..., description="Base URL for UV API (e.g. https://api.openweathermap.org/data/2.5)")
+    timeout: int = Field(default=30)
+
+    model_config = ConfigDict(env_prefix="UV_")
+
 
 class AppConfig(BaseSettings):
     app_name: str = Field(..., description="Application name")
@@ -39,6 +47,7 @@ class AppConfig(BaseSettings):
     traffic: Optional[TrafficClientConfig] = None
     weather: Optional[WeatherClientConfig] = None
     air_pollution: Optional[AirPollutionClientConfig] = None
+    uv: Optional[UVClientConfig] = None
 
 
 def get_config() -> AppConfig:
@@ -50,11 +59,13 @@ def get_config() -> AppConfig:
     traffic_config = TrafficClientConfig()
     weather_config = WeatherClientConfig()
     air_pollution_config = AirPollutionClientConfig()
+    uv_config = UVClientConfig()
 
     app_config = AppConfig(
         traffic=traffic_config,
         weather=weather_config,
         air_pollution=air_pollution_config,
+        uv=uv_config
     )
 
     return app_config
