@@ -1,11 +1,12 @@
 package preprocessing.transform
 
-import org.apache.spark.sql.{DataFrame}
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.expressions.Window
 
 object FeatureEngineeringPreprocessor {
-  def enrich(featuresWithAQ: DataFrame : DataFrame = {
+
+  def enrich(featuresWithAQ: DataFrame): DataFrame = {
 
     val locTimeWindow = Window
       .partitionBy("lat", "lon")

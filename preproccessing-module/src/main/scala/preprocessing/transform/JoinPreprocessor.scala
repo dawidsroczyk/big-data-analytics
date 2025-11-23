@@ -1,7 +1,8 @@
 package preprocessing.transform
 
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.expressions.Window
 
 object JoinPreprocessor {
 
@@ -54,7 +55,7 @@ object JoinPreprocessor {
     joined
   }
 
-  /** Do GOLD – doda label z air quality */
+  /** GOLD – doklej label z air quality */
   def attachAirQuality(
                         features: DataFrame,
                         air: DataFrame
@@ -90,5 +91,36 @@ object JoinPreprocessor {
     withLabel.show(10, truncate = false)
 
     withLabel
+  }
+
+  /** GOLD – doklej UV */
+  def attachUv(
+                features: DataFrame,
+                uv: DataFrame
+              ): DataFrame = {
+    val f = features.alias("f")
+    val u = uv.alias("u")
+
+    val withUv = f.join(
+      u,
+      expr(
+        """
+          f.lat = u.lat AND
+          f.lon = u.lon AND
+          u.event_ts BETWEEN f.event_ts - INTERVAL 2 MINUTES
+                         AND     f.event_ts + INTERVAL 2 MINUTES
+        """
+      ),
+      "left"
+    ).select(
+      col("f.*"),
+      col("u.uv_index"),
+      col("u.data_provider").as("uv_provider")
+    )
+
+    println("=== JoinPreprocessor: FEATURES + UV sample ===")
+    withUv.show(10, truncate = false)
+
+    withUv
   }
 }
