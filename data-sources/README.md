@@ -28,6 +28,14 @@
 | WEATHER_API_KEY     | API key for weather provider                | your-weather-api-key                 |
 | WEATHER_BASE_URL    | Base URL for weather API                    | https://api.openweathermap.org/data/2.5 |
 | WEATHER_TIMEOUT     | Timeout for weather API (seconds)           | 30                                   |
+| UV_PROVIDER         |                                             | mock                                 |
+| UV_API_KEY          |                                             | your-uv-api-key                      |
+| UV_BASE_URL         |                                             | https://api.openweathermap.org/data/2.5 |
+| UV_TIMEOUT          |                                             | 30                                   |
+| AIR_POLLUTION_PROVIDER         |                                             | mock                                 |
+| AIR_POLLUTION_API_KEY          |                                             | your-uv-api-key                      |
+| AIR_POLLUTION_BASE_URL         |                                             | https://api.openweathermap.org/data/2.5 |
+| AIR_POLLUTION_TIMEOUT          |                                             | 30                                   |
 
 ---
 
