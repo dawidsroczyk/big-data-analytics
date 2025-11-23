@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<configuration>
+
+    <!-- Główny adres systemu plików (HDFS) -->
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://namenode:8020</value>
+        <!--
+            To jest "adres" HDFS.
+            Każda aplikacja (Spark, NiFi, API, hdfs dfs ...) będzie używać tego jako punktu wejścia.
+            :8020 to port RPC NameNode.
+        -->
+    </property>
+
+    <!-- Ścieżka do katalogu, gdzie Hadoop trzyma swoje pliki tymczasowe -->
+    <property>
+        <name>hadoop.tmp.dir</name>
+        <value>/hadoop_tmp</value>
+        <!--
+            W Dockerze warto mieć to jako katalog wewnątrz kontenera lub volumen.
+            Hadoop tu trzyma pliki cache i lockfile.
+        -->
+    </property>
+
+</configuration>

@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<configuration>
+
+    <!-- 🔥 Najważniejsze: ile kopii każdego bloku -->
+    <property>
+        <name>dfs.replication</name>
+        <value>3</value>
+        <!--
+            Replikacja 3 = odporność przy awarii 1 DataNode.
+        -->
+    </property>
+
+    <!-- 📁 Gdzie NameNode zapisuje metadane (musi być volume w Dockerze!) -->
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>file:///hadoop/dfs/name</value>
+    </property>
+
+    <!-- 📁 Gdzie DataNode trzyma blokowe dane (również powinien być volume) -->
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>file:///hadoop/dfs/data</value>
+    </property>
+
+    <!-- 🔗 Adres NameNode do RPC (musi zgadzać się z core-site.xml i docker-compose) -->
+    <property>
+        <name>dfs.namenode.rpc-address</name>
+        <value>namenode:8020</value>
+    </property>
+
+    <!-- 🌐 Adres HTTP UI NameNode -->
+    <property>
+        <name>dfs.namenode.http-address</name>
+        <value>namenode:9870</value>
+    </property>
+
+    <!-- 🚫 Wyłączamy permissions - Docker i YARN mają różne user id -->
+    <property>
+        <name>dfs.permissions.enabled</name>
+        <value>false</value>
+    </property>
+
+    <!-- ❤️ DataNode wysyła heartbeat co 5 sekund -->
+    <property>
+        <name>dfs.heartbeat.interval</name>
+        <value>5</value>
+    </property>
+
+    <!-- 🩹 Krytyczne w Dockerze: IGNORUJ CHECK HOSTNAME/IP -->
+    <property>
+        <name>dfs.namenode.datanode.registration.ip-hostname-check</name>
+        <value>false</value>
+    </property>
+
+    <!-- 🧱 Minimalne wolne miejsce zarezerwowane na DataNode -->
+    <property>
+        <name>dfs.datanode.du.reserved</name>
+        <value>1073741824</value>
+    </property>
+
+</configuration>
