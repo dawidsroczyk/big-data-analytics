@@ -1,18 +1,17 @@
 package preprocessing.config
 
 final case class PreprocessingConfig(
-                                    rawBasePath: String,
-                                    silverBasePath: String,
-                                    goldBasePath: String
+                                      rawBasePath: String,
+                                      silverBasePath: String,
+                                      goldBasePath: String
                                     )
 
 object PreprocessingConfig {
 
   def fromEnv(): PreprocessingConfig = {
-    val rawBase       = sys.env.getOrElse("RAW_BASE_PATH", "hdfs:///data/raw")
-    val silverBase    = sys.env.getOrElse("SILVER_BASE_PATH", "hdfs:///data/silver")
-    val goldBase      = sys.env.getOrElse("GOLD_BASE_PATH", "hdfs:///data/gold")
-
+    val rawBase    = sys.env.getOrElse("RAW_BASE_PATH", "hdfs://localhost:8020/bronze/raw")
+    val silverBase = sys.env.getOrElse("SILVER_BASE_PATH", "hdfs://localhost:8020/data/silver")
+    val goldBase   = sys.env.getOrElse("GOLD_BASE_PATH", "hdfs://localhost:8020/data/gold")
 
     PreprocessingConfig(
       rawBasePath    = rawBase,
