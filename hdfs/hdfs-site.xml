@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<configuration>
+    <!-- Directory replication factor -->
+    <property>
+        <name>dfs.replication</name>
+        <value>1</value>
+    </property>
+
+    <!-- DataNode storage directories (inside container) -->
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>/hadoop/dfs/data</value>
+    </property>
+
+    <!-- NameNode storage directories (inside container) -->
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>/hadoop/dfs/name</value>
+    </property>
+
+    <!-- RPC address for NameNode -->
+    <property>
+        <name>dfs.namenode.rpc-address</name>
+        <value>hdfs-namenode-1:9000</value>
+    </property>
+</configuration>

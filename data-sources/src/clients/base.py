@@ -27,3 +27,11 @@ class BaseWeatherClient(ABC):
     @abstractmethod
     async def get_forecast(self, lat: float, lng: float, days: int = 5) -> Dict[str, Any]:
         pass
+
+class BaseAirPollutionClient(ABC):
+    def __init__(self, config: ClientConfig):
+        self.config = config
+
+    @abstractmethod
+    async def get_current_air_pollution(self, lat: float, lon: float) -> Dict[str, Any]:
+        pass

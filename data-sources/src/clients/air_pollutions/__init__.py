@@ -1,0 +1,12 @@
+# clients/air_pollution/__init__.py
+from .mock import MockAirPollutionClient
+
+AIR_POLLUTION_CLIENTS = {
+    "mock": MockAirPollutionClient
+}
+
+def create_air_pollution_client(provider: str, config):
+    client_class = AIR_POLLUTION_CLIENTS.get(provider)
+    if not client_class:
+        raise ValueError(f"Unknown air-pollution provider: {provider}")
+    return client_class(config)

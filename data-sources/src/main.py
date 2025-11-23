@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config import get_config
-from .routers import traffic, weather, health
+from .routers import traffic, weather, health, air_pollution
 
 def create_application() -> FastAPI:
     config = get_config()
@@ -23,6 +23,7 @@ def create_application() -> FastAPI:
     app.include_router(traffic.router, prefix="/api/v1", tags=["traffic"])
     app.include_router(weather.router, prefix="/api/v1", tags=["weather"])
     app.include_router(health.router, prefix="/api/v1", tags=["health"])
+    app.include_router(air_pollution.router, prefix="/api/v1", tags=["air_pollution"])
     
     @app.get("/")
     async def root():
@@ -32,7 +33,8 @@ def create_application() -> FastAPI:
             "endpoints": {
                 "traffic": "/api/v1/traffic?lat=40.7128&lng=-74.0060",
                 "weather": "/api/v1/weather?lat=40.7128&lng=-74.0060",
-                "health": "/api/v1/health"
+                "health": "/api/v1/health",
+                "air_pollution": "/api/v1/air_pollution?lat=40.7128&lon=-74.0060"
             }
         }
     
