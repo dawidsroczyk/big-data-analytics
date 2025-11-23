@@ -221,4 +221,5 @@ hdfs/test.sh/
 # Keep NiFi Registry serialized flows
 !nifi/registry-data/flow_storage/
 !nifi/registry-data/database/
-!nifi/registry-data/git/
+!nifi/registry-data/git/hdfs/namenode/current/
+./hdfs/namenode/current/
