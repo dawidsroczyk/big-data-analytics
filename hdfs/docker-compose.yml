@@ -13,7 +13,6 @@ services:
       - 9870:9870
       - 8020:8020
     environment:
-      ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
       HADOOP_HOME: "/opt/hadoop"
     volumes:
       - ./namenode:/hadoop/dfs/name
@@ -24,6 +23,12 @@ services:
       - ./conf/capacity-scheduler.xml:/opt/hadoop/etc/hadoop/capacity-scheduler.xml
     networks:
       - big-data-network
+    healthcheck:
+      test: ["CMD-SHELL", "hdfs dfsadmin -safemode get | grep -q 'OFF'"]
+      interval: 5s
+      timeout: 3s
+      retries: 40
+      start_period: 10s
 
 
   # -----------------------------
@@ -101,6 +106,9 @@ services:
       - ./conf/capacity-scheduler.xml:/opt/hadoop/etc/hadoop/capacity-scheduler.xml
     networks:
       - big-data-network
+    depends_on:
+      namenode:
+        condition: service_healthy
 
 
   # -----------------------------
@@ -109,11 +117,16 @@ services:
   nodemanager1:
     image: apache/hadoop:3
     hostname: nodemanager1
+    container_name: nodemanager1
     command: [ "yarn", "nodemanager" ]
     environment:
       HADOOP_HOME: "/opt/hadoop"
       YARN_HOME: "/opt/hadoop"
+    depends_on:
+      resourcemanager:
+        condition: service_started
     volumes:
+      - ./nm1:/hadoop_tmp/nm-local-dir
       - ./conf/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
       - ./conf/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
       - ./conf/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
@@ -130,7 +143,11 @@ services:
     environment:
       HADOOP_HOME: "/opt/hadoop"
       YARN_HOME: "/opt/hadoop"
+    depends_on:
+      resourcemanager:
+        condition: service_started
     volumes:
+      - ./nm2:/hadoop_tmp/nm-local-dir
       - ./conf/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
       - ./conf/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
       - ./conf/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
@@ -147,7 +164,11 @@ services:
     environment:
       HADOOP_HOME: "/opt/hadoop"
       YARN_HOME: "/opt/hadoop"
+    depends_on:
+      resourcemanager:
+        condition: service_started
     volumes:
+      - ./nm3:/hadoop_tmp/nm-local-dir
       - ./conf/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
       - ./conf/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
       - ./conf/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml

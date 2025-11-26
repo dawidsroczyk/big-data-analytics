@@ -11,3 +11,17 @@ lazy val root = (project in file("."))
       "org.apache.spark" %% "spark-mllib" % "3.5.0"
     )
   )
+
+import sbtassembly.AssemblyPlugin.autoImport._
+
+assembly / assemblyMergeStrategy := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case PathList("module-info.class") => MergeStrategy.discard
+  case "arrow-git.properties" => MergeStrategy.first
+  case "META-INF/io.netty.versions.properties" => MergeStrategy.first
+  case "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat" =>
+    MergeStrategy.concat
+  case PathList("google", "protobuf", xs @ _*) => MergeStrategy.first
+  case PathList("org", "apache", "commons", "logging", xs @ _*) => MergeStrategy.first
+  case _ => MergeStrategy.first
+}
