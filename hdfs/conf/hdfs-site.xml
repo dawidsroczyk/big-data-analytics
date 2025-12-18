@@ -19,8 +19,9 @@
     <!-- 📁 Gdzie DataNode trzyma blokowe dane (również powinien być volume) -->
     <property>
         <name>dfs.datanode.data.dir</name>
-        <value>file:///hadoop/dfs/data</value>
+        <value>file:///hadoop_tmp/dfs/data</value>
     </property>
+
 
     <!-- 🔗 Adres NameNode do RPC (musi zgadzać się z core-site.xml i docker-compose) -->
     <property>
