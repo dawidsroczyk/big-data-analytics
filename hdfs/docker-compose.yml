@@ -8,10 +8,11 @@ services:
     image: apache/hadoop:3
     hostname: namenode
     container_name: namenode
-    command: [ "hdfs", "namenode" ]
+    command: /bin/bash -c "if [ ! -d /hadoop/dfs/name/current ]; then hdfs namenode -format; fi && hdfs namenode"
     ports:
       - 9870:9870
       - 8020:8020
+    user: "root"
     environment:
       HADOOP_HOME: "/opt/hadoop"
    #   ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
@@ -40,6 +41,7 @@ services:
     hostname: datanode1
     container_name: datanode1
     command: [ "hdfs", "datanode" ]
+    user: "root"
     environment:
       CLUSTER_NAME: "hadoop-cluster"
       HADOOP_HOME: "/opt/hadoop"
@@ -58,6 +60,7 @@ services:
     hostname: datanode2
     container_name: datanode2
     command: [ "hdfs", "datanode" ]
+    user: "root"
     environment:
       CLUSTER_NAME: "hadoop-cluster"
       HADOOP_HOME: "/opt/hadoop"
@@ -76,6 +79,7 @@ services:
     hostname: datanode3
     container_name: datanode3
     command: [ "hdfs", "datanode" ]
+    user: "root"
     environment:
       CLUSTER_NAME: "hadoop-cluster"
       HADOOP_HOME: "/opt/hadoop"
@@ -100,6 +104,7 @@ services:
     command: [ "yarn", "resourcemanager" ]
     ports:
       - 8088:8088
+    user: "root"
     environment:
       HADOOP_HOME: "/opt/hadoop"
       YARN_HOME: "/opt/hadoop"
@@ -124,6 +129,7 @@ services:
     hostname: nodemanager1
     container_name: nodemanager1
     command: [ "yarn", "nodemanager" ]
+    user: "root"
     environment:
       HADOOP_HOME: "/opt/hadoop"
       YARN_HOME: "/opt/hadoop"
@@ -145,6 +151,7 @@ services:
     hostname: nodemanager2
     container_name: nodemanager2
     command: [ "yarn", "nodemanager" ]
+    user: "root"
     environment:
       HADOOP_HOME: "/opt/hadoop"
       YARN_HOME: "/opt/hadoop"
@@ -166,6 +173,7 @@ services:
     hostname: nodemanager3
     container_name: nodemanager3
     command: [ "yarn", "nodemanager" ]
+    user: "root"
     environment:
       HADOOP_HOME: "/opt/hadoop"
       YARN_HOME: "/opt/hadoop"
@@ -192,6 +200,7 @@ services:
     command: [ "mapred", "historyserver" ]
     ports:
       - 19888:19888
+    user: "root"
     environment:
       HADOOP_HOME: "/opt/hadoop"
     volumes:
@@ -253,4 +262,5 @@ services:
 
 networks:
   big-data-network:
+    name: big-data-network
     external: true
