@@ -9,7 +9,7 @@ class MockWeatherClient(BaseWeatherClient):
     
     async def get_current_weather(self, lat: float, lng: float) -> Dict[str, Any]:
         await asyncio.sleep(0.1)
-        
+        now = datetime.now()
         conditions = ["sunny", "cloudy", "rainy", "snowy", "foggy"]
         return {
             "temperature": round(random.uniform(-10, 35), 1),

@@ -1,0 +1,36 @@
+services:
+  spark-master:
+    image: bde2020/spark-master:3.3.0-hadoop3.3
+    container_name: spark-master
+    hostname: spark-master
+    environment:
+      - INIT_DAEMON_STEP=setup_spark
+    ports:
+      - "8080:8080"   # Spark Master UI
+      - "7077:7077"   # Spark RPC
+    networks:
+      - big-data-network
+    volumes:
+      - ../hdfs/conf/core-site.xml:/spark/conf/core-site.xml
+      - ../hdfs/conf/hdfs-site.xml:/spark/conf/hdfs-site.xml
+
+  spark-worker:
+    image: bde2020/spark-worker:3.3.0-hadoop3.3
+    container_name: spark-worker
+    hostname: spark-worker
+    depends_on:
+      - spark-master
+    environment:
+      - INIT_DAEMON_STEP=setup_spark
+      - SPARK_MASTER=spark://spark-master:7077
+    ports:
+      - "8081:8081"   # Worker UI
+    networks:
+      - big-data-network
+    volumes:
+      - ../hdfs/conf/core-site.xml:/spark/conf/core-site.xml
+      - ../hdfs/conf/hdfs-site.xml:/spark/conf/hdfs-site.xml
+
+networks:
+  big-data-network:
+    external: true

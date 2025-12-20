@@ -3,6 +3,16 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Zone identifier
+*Zone.Identifier
+
+# SBT / Intelij
+.idea/
+*.iml
+out/
+target/
+*.jar
+
 # C extensions
 *.so
 

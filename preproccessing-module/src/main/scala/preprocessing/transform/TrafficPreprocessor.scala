@@ -30,21 +30,30 @@ object TrafficPreprocessor {
     val cleaned = df
       .filter(col("event_ts").isNotNull)
       .filter(col("lat").isNotNull && col("lon").isNotNull)
-      .filter(col("current_travel_time")   >= 0 || col("current_travel_time").isNull)
+      .filter(col("current_travel_time") >= 0 || col("current_travel_time").isNull)
       .filter(col("free_flow_travel_time") >= 0 || col("free_flow_travel_time").isNull)
-      .filter(col("free_flow_speed")       >= 0 || col("free_flow_speed").isNull)
+      .filter(col("free_flow_speed") >= 0 || col("free_flow_speed").isNull)
       .dropDuplicates("lat", "lon", "event_ts")
 
     val locWindow = Window.partitionBy("lat", "lon")
 
     val enriched = cleaned
+      // ---- IMPUTATIONS ----
       .withColumn(
         "current_travel_time_imputed",
         coalesce(
           col("current_travel_time"),
-          expr("percentile_approx(current_travel_time, 0.5) over (partition by lat, lon)")
+          percentile_approx(col("current_travel_time"), lit(0.5), lit(10000)).over(locWindow)
         )
       )
+      .withColumn(
+        "free_flow_travel_time_imputed",
+        coalesce(
+          col("free_flow_travel_time"),
+          percentile_approx(col("free_flow_travel_time"), lit(0.5), lit(10000)).over(locWindow)
+        )
+      )
+      // ---- METRICS ----
       .withColumn(
         "congestion_index",
         col("current_travel_time_imputed") / col("free_flow_travel_time_imputed")
