@@ -6,6 +6,7 @@ import org.apache.spark.sql.expressions.Window
 
 object JoinPreprocessor {
 
+  /** Join weather and traffic data within ±2 minutes window */
   def joinWeatherTraffic(weather: DataFrame, traffic: DataFrame): DataFrame = {
     println("=== JoinPreprocessor: WEATHER schema ===")
     weather.printSchema()
@@ -22,7 +23,7 @@ object JoinPreprocessor {
           w.lat = t.lat AND
           w.lon = t.lon AND
           t.event_ts BETWEEN w.event_ts - INTERVAL 2 MINUTES
-                         AND     w.event_ts + INTERVAL 2 MINUTES
+                         AND w.event_ts + INTERVAL 2 MINUTES
         """
         ),
         "inner"
@@ -55,68 +56,81 @@ object JoinPreprocessor {
     joined
   }
 
-  /** GOLD – doklej label z air quality */
-  def attachAirQuality(
-                        features: DataFrame,
-                        air: DataFrame
-                      ): DataFrame = {
-    val f = features.alias("f")
-    val a = air.alias("a")
-
-    val withLabel = f.join(
-      a,
-      expr(
-        """
-          f.lat = a.lat AND
-          f.lon = a.lon AND
-          a.event_ts BETWEEN f.event_ts - INTERVAL 2 MINUTES
-                         AND     f.event_ts + INTERVAL 2 MINUTES
-        """
-      ),
-      "left"
-    ).select(
-      col("f.*"),
-      col("a.aqi").as("label_aqi"),
-      col("a.pm25"),
-      col("a.pm10"),
-      col("a.no2"),
-      col("a.so2"),
-      col("a.o3"),
-      col("a.co"),
-      col("a.nh3"),
-      col("a.data_provider").as("air_provider")
+  /** Attach air quality data to features, truncating timestamps to seconds */
+  def attachAirQuality(features: DataFrame, air: DataFrame): DataFrame = {
+    val f = features.withColumn("event_ts_sec", unix_timestamp(col("event_ts"))).alias("f")
+    val airSelected = air.select(
+      col("lat"),
+      col("lon"),
+      col("event_ts"),
+      col("o3"),
+      col("aqi"),
+      col("pm25"),
+      col("pm10"),
+      col("no2"),
+      col("co"),
+      col("nh3"),
+      col("so2"),
+      col("data_provider")
     )
+    val a = airSelected
+      .withColumn("event_ts_sec", unix_timestamp(col("event_ts")))
+      .groupBy("lat", "lon", "event_ts_sec")
+      .agg(
+        avg("aqi").as("label_aqi"),
+        avg("pm25").as("pm25"),
+        avg("pm10").as("pm10"),
+        avg("no2").as("no2"),
+        avg("so2").as("so2"),
+        avg("o3").as("o3"),
+        avg("co").as("co"),
+        avg("nh3").as("nh3"),
+        first("data_provider").as("air_provider")
+      ).alias("a")
+
+    val withAq = f.join(
+      a,
+      expr("f.lat = a.lat AND f.lon = a.lon AND abs(f.event_ts_sec - a.event_ts_sec + 60) == 1"),
+      "left"
+    ).drop("event_ts_sec")
+      .drop(a("lat"))
+      .drop(a("lon"))// drop helper column
 
     println("=== JoinPreprocessor: FEATURES + LABEL sample ===")
-    withLabel.show(10, truncate = false)
+    withAq.show(10, truncate = false)
 
-    withLabel
+    withAq
   }
 
-  /** GOLD – doklej UV */
-  def attachUv(
-                features: DataFrame,
-                uv: DataFrame
-              ): DataFrame = {
-    val f = features.alias("f")
-    val u = uv.alias("u")
+  /** Attach UV data to features, timestamps should already be aligned */
+  def attachUv(features: DataFrame, uvAgg: DataFrame): DataFrame = {
+    import features.sparkSession.implicits._
+    import org.apache.spark.sql.functions._
+
+    val f = features.withColumn("event_ts_sec", unix_timestamp(col("event_ts"))).alias("f")
+    val u = uvAgg
+      .withColumn("event_ts_sec", unix_timestamp(col("event_ts")))
+      .groupBy("lat", "lon", "event_ts_sec")
+      .agg(
+        avg("uv_index").as("uv_index"),
+        first("data_provider").as("uv_provider")
+      )
+      .select(
+        col("lat"),
+        col("lon"),
+        col("event_ts_sec"),
+        col("uv_index"),
+        col("uv_provider")
+      )
+      .alias("u")
 
     val withUv = f.join(
       u,
-      expr(
-        """
-          f.lat = u.lat AND
-          f.lon = u.lon AND
-          u.event_ts BETWEEN f.event_ts - INTERVAL 2 MINUTES
-                         AND     f.event_ts + INTERVAL 2 MINUTES
-        """
-      ),
+      expr("f.lat = u.lat AND f.lon = u.lon AND abs(f.event_ts_sec - u.event_ts_sec + 60) == 1"),
       "left"
-    ).select(
-      col("f.*"),
-      col("u.uv_index"),
-      col("u.data_provider").as("uv_provider")
-    )
+    ).drop(u("event_ts_sec"))
+      .drop(u("lat"))
+      .drop(u("lon"))
 
     println("=== JoinPreprocessor: FEATURES + UV sample ===")
     withUv.show(10, truncate = false)

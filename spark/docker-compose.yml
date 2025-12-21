@@ -5,6 +5,8 @@ services:
     hostname: spark-master
     environment:
       - INIT_DAEMON_STEP=setup_spark
+      - SPARK_WORKER_MEMORY=4g
+      - SPARK_WORKER_CORES=4
     ports:
       - "8080:8080"   # Spark Master UI
       - "7077:7077"   # Spark RPC

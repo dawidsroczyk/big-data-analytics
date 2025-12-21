@@ -15,8 +15,8 @@ services:
     volumes:
       - nifi_data:/opt/nifi/nifi-current
       - ./hadoop-conf:/opt/nifi/nifi-current/conf/hadoop-conf:ro
-      - ../hdfs/core-site.xml:/opt/hadoop/conf/core-site.xml:ro
-      - ../hdfs/hdfs-site.xml:/opt/hadoop/conf/hdfs-site.xml:ro
+      - ../hdfs/conf/core-site.xml:/opt/hadoop/conf/core-site.xml:ro
+      - ../hdfs/conf/hdfs-site.xml:/opt/hadoop/conf/hdfs-site.xml:ro
       - ./nifi-hadoop-jars/:/opt/nifi/custom-hadoop-lib/:ro
     networks:
       - big-data-network
