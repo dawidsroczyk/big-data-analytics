@@ -24,7 +24,7 @@
 | TRAFFIC_API_KEY     | API key for traffic provider                | your-traffic-api-key                 |
 | TRAFFIC_BASE_URL    | Base URL for traffic API                    | https://api.tomtom.com       |
 | TRAFFIC_TIMEOUT     | Timeout for traffic API (seconds)           | 30                                   |
-| WEATHER_PROVIDER    | Weather provider (`mock`)                   | mock                                 |
+| WEATHER_PROVIDER    | Weather provider (`mock`, `openweathermap`) | mock                                 |
 | WEATHER_API_KEY     | API key for weather provider                | your-weather-api-key                 |
 | WEATHER_BASE_URL    | Base URL for weather API                    | https://api.openweathermap.org/data/2.5 |
 | WEATHER_TIMEOUT     | Timeout for weather API (seconds)           | 30                                   |
