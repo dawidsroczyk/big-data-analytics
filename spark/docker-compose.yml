@@ -28,6 +28,7 @@ services:
     networks:
       - big-data-network
     volumes:
+      - ../hdfs/conf/hive-site.xml:/spark/conf/hive-site.xml:ro
       - ../hdfs/conf/core-site.xml:/spark/conf/core-site.xml
       - ../hdfs/conf/hdfs-site.xml:/spark/conf/hdfs-site.xml
 
