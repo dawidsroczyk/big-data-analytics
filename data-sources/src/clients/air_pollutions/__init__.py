@@ -1,8 +1,10 @@
 # clients/air_pollution/__init__.py
 from .mock import MockAirPollutionClient
+from .openweathermap import OpenWeatherMapAirPollutionClient
 
 AIR_POLLUTION_CLIENTS = {
-    "mock": MockAirPollutionClient
+    "mock": MockAirPollutionClient,
+    "openweathermap": OpenWeatherMapAirPollutionClient,
 }
 
 def create_air_pollution_client(provider: str, config):

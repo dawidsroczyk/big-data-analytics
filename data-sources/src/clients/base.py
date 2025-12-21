@@ -35,3 +35,11 @@ class BaseAirPollutionClient(ABC):
     @abstractmethod
     async def get_current_air_pollution(self, lat: float, lon: float) -> Dict[str, Any]:
         pass
+
+class BaseUVClient(ABC):
+    def __init__(self, config: ClientConfig):
+        self.config = config
+
+    @abstractmethod
+    async def get_uv_index(self, lat: float, lng: float) -> Dict[str, Any]:
+        pass

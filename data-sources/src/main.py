@@ -35,8 +35,7 @@ def create_application() -> FastAPI:
                 "traffic": "/api/v1/traffic?lat=40.7128&lng=-74.0060",
                 "weather": "/api/v1/weather?lat=40.7128&lng=-74.0060",
                 "health": "/api/v1/health",
-                "air_pollution": "/api/v1/air_pollution?lat=40.7128&lon=-74.0060"
-                ,
+                "air_pollution": "/api/v1/air_pollution?lat=40.7128&lng=-74.0060",
                 "uv": "/api/v1/uv?lat=40.7128&lng=-74.0060"
             }
         }

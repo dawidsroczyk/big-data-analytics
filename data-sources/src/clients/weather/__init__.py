@@ -1,7 +1,10 @@
 from .mock import MockWeatherClient
+from .openweathermap import OpenWeatherMapClient  # added
 
 WEATHER_CLIENTS = {
-    "mock": MockWeatherClient
+    "mock": MockWeatherClient,
+    "openweathermap": OpenWeatherMapClient,            # added
+    "openweathermap_legacy": OpenWeatherMapClient      # alias for compatibility (optional)
 }
 
 def create_weather_client(provider: str, config):
