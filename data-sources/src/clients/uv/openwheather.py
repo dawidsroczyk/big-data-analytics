@@ -1,10 +1,10 @@
 from typing import Dict, Any
 import httpx
-from ..base import BaseWeatherClient, ClientConfig
+from ..base import BaseUVClient, ClientConfig
 from datetime import datetime
 
 
-class OpenWeatherUVClient(BaseWeatherClient):
+class OpenWeatherUVClient(BaseUVClient):
     """OpenWeatherMap UV client (minimal, uses httpx)."""
 
     def __init__(self, config: ClientConfig):

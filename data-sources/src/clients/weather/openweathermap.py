@@ -53,7 +53,7 @@ class OpenWeatherMapClient(BaseWeatherClient):
 
         name = data.get("name") or ""
         country = (data.get("sys") or {}).get("country") or ""
-        location = f"{name}, {country}".strip(", ") if name else f"{lat},{lng}"
+        location = f"{lat},{lng}"
 
         return {
             "temperature": float(main.get("temp", 0.0)),
@@ -116,6 +116,11 @@ class OpenWeatherMapClient(BaseWeatherClient):
         forecast_list: List[Dict[str, Any]] = list(daily.values())
         return {
             "forecast": forecast_list,
-            "location": f"{(data.get('city') or {}).get('name', f'{lat},{lng}')}",
+            "location": f"{lat},{lng}",
+            "provider": "openweathermap"
+        }
+        return {
+            "forecast": forecast_list,
+            "location": location,
             "provider": "openweathermap"
         }
