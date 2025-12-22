@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  hive-metastore-db:
+    image: postgres:15
+    container_name: hive-metastore-db
+    environment:
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hive
+      POSTGRES_DB: metastore
+    volumes:
+      - hive-metastore-db-volume:/var/lib/postgresql/data
+    networks:
+      - big-data-network
+
+  hive-metastore:
+    build: .
+    image: custom-hive:4.0.0
+    container_name: hive-metastore
+    depends_on:
+      - hive-metastore-db
+    environment:
+      SERVICE_NAME: metastore
+      DB_DRIVER: postgres
+      HADOOP_CONF_DIR: /opt/hadoop/etc/hadoop
+      HADOOP_CLASSPATH: /opt/hadoop/share/hadoop/common/lib/postgresql.jar
+      SERVICE_OPTS: >
+        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://hive-metastore-db:5432/metastore
+        -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
+        -Djavax.jdo.option.ConnectionUserName=hive
+        -Djavax.jdo.option.ConnectionPassword=hive
+        -Dhive.metastore.uris=thrift://hive-metastore:9083
+    ports:
+      - "9083:9083"
+    volumes:
+      - ../hdfs/conf/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml:ro
+      - ../hdfs/conf/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml:ro
+    networks:
+      - big-data-network
+
+  hive-server2:
+    build: .
+    image: custom-hive:4.0.0
+    container_name: hive-server2
+    depends_on:
+      - hive-metastore
+    environment:
+      SERVICE_NAME: hiveserver2
+      HADOOP_CONF_DIR: /opt/hadoop/etc/hadoop
+      HADOOP_CLASSPATH: /opt/hadoop/share/hadoop/common/lib/postgresql.jar
+      SERVICE_OPTS: >
+        -Dhive.metastore.uris=thrift://hive-metastore:9083
+    ports:
+      - "10000:10000"
+      - "10002:10002"
+    volumes:
+      - ../hdfs/conf/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml:ro
+      - ../hdfs/conf/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml:ro
+    networks:
+      - big-data-network
+
+volumes:
+  hive-metastore-db-volume:
+
+networks:
+  big-data-network:
+    external: true
