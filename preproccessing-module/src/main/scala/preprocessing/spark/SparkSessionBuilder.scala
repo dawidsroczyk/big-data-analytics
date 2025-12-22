@@ -8,6 +8,11 @@ object SparkSessionBuilder {
       .appName(appName)
       .master("spark://spark-master:7077")   // IMPORTANT: use Docker master
       .config("spark.hadoop.fs.defaultFS", "hdfs://namenode:8020")
+      .config(
+        "spark.hadoop.hive.metastore.uris",
+        "thrift://hive-metastore:9083"
+      )
+      .enableHiveSupport()
       .getOrCreate()
   }
   def build_original(appName: String) : SparkSession = {

@@ -17,7 +17,10 @@ object FeatureEngineeringPreprocessor {
         "pm25",
         "pm10",
         "temperature",
-        "humidity"
+        "humidity",
+        "free_flow_speed",
+        "free_flow_travel_time",
+        "current_travel_time"
       )
       .orderBy("event_ts")
 
@@ -32,6 +35,15 @@ object FeatureEngineeringPreprocessor {
       .withColumn("aqi_delta_1", col("label_aqi") - col("aqi_lag_1"))
       .withColumn("temp_centered", col("temperature") - avg("temperature").over(rollingWindow))
       .withColumn("humidity_centered", col("humidity") - avg("humidity").over(rollingWindow))
+      .withColumn("free_flow_speed_roll_mean_4",
+        avg("free_flow_speed").over(rollingWindow)
+      )
+      .withColumn("free_flow_travel_time_roll_mean_4",
+        avg("free_flow_travel_time").over(rollingWindow)
+      )
+      .withColumn("current_travel_time_roll_mean_4",
+        avg("current_travel_time").over(rollingWindow)
+      )
   }
 
 
