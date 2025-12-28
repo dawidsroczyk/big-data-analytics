@@ -2,6 +2,7 @@ version: '3.8'
 
 networks:
   big-data-network:
+    external: true
 
 # -----------------------------
 # Kafka brokers (KRaft mode) <- w tym nowym modzie zookeper nie jest potrzebny
