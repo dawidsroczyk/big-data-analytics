@@ -2,6 +2,7 @@
 
 Run docker-compose and initialize HDFS:
 ```bash
+chmod -R 777 ./hadoop-data
 docker compose up -d
 ./setup-hdfs.sh
 ```

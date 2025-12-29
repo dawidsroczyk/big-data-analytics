@@ -1,0 +1,75 @@
+version: '3.8'
+
+networks:
+  big-data-network:
+    external: true
+
+# -----------------------------
+# Kafka brokers (KRaft mode) <- w tym nowym modzie zookeper nie jest potrzebny
+# -----------------------------
+services:
+  kafka1:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka1
+    container_name: kafka1
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: 'false'
+      CLUSTER_ID: "Mhwr48ECRyiC3J6oLSOESg"
+      KAFKA_CLUSTER_ID: "Mhwr48ECRyiC3J6oLSOESg"
+    ports:
+      - 9092:9092
+    networks:
+      - big-data-network
+
+  kafka2:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka2
+    container_name: kafka2
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092
+      KAFKA_PROCESS_ROLES: broker
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: 'false'
+      CLUSTER_ID: "Mhwr48ECRyiC3J6oLSOESg"
+      KAFKA_CLUSTER_ID: "Mhwr48ECRyiC3J6oLSOESg"
+    ports:
+      - 9093:9092
+    networks:
+      - big-data-network
+
+  kafka-setup:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka-setup
+    container_name: kafka-setup
+    depends_on:
+      - kafka1
+      - kafka2
+    networks:
+      - big-data-network
+    command: >
+      bash -c "
+        echo 'Waiting for Kafka to be ready...'
+        cub kafka-ready -b kafka1:9092 1 60
+        echo 'Kafka is ready!'
+        
+        kafka-topics --create --if-not-exists --topic raw_weather --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 2
+        kafka-topics --create --if-not-exists --topic raw_traffic --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 2
+        kafka-topics --create --if-not-exists --topic raw_air_quality --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 2
+        kafka-topics --create --if-not-exists --topic raw_uv --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 2
+        
+        echo 'Topics created.'"

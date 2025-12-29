@@ -8,10 +8,11 @@ services:
     image: apache/hadoop:3
     hostname: namenode
     container_name: namenode
-    command: [ "hdfs", "namenode" ]
+    command: /bin/bash -c "if [ ! -d /hadoop/dfs/name/current ]; then hdfs namenode -format; fi && hdfs namenode"
     ports:
       - 9870:9870
       - 8020:8020
+    user: "root"
     environment:
       HADOOP_HOME: "/opt/hadoop"
    #   ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
@@ -40,6 +41,7 @@ services:
     hostname: datanode1
     container_name: datanode1
     command: [ "hdfs", "datanode" ]
+    user: "root"
     environment:
       CLUSTER_NAME: "hadoop-cluster"
       HADOOP_HOME: "/opt/hadoop"
@@ -58,6 +60,7 @@ services:
     hostname: datanode2
     container_name: datanode2
     command: [ "hdfs", "datanode" ]
+    user: "root"
     environment:
       CLUSTER_NAME: "hadoop-cluster"
       HADOOP_HOME: "/opt/hadoop"
@@ -76,6 +79,7 @@ services:
     hostname: datanode3
     container_name: datanode3
     command: [ "hdfs", "datanode" ]
+    user: "root"
     environment:
       CLUSTER_NAME: "hadoop-cluster"
       HADOOP_HOME: "/opt/hadoop"
@@ -100,6 +104,7 @@ services:
     command: [ "yarn", "resourcemanager" ]
     ports:
       - 8088:8088
+    user: "root"
     environment:
       HADOOP_HOME: "/opt/hadoop"
       YARN_HOME: "/opt/hadoop"
@@ -124,6 +129,7 @@ services:
     hostname: nodemanager1
     container_name: nodemanager1
     command: [ "yarn", "nodemanager" ]
+    user: "root"
     environment:
       HADOOP_HOME: "/opt/hadoop"
       YARN_HOME: "/opt/hadoop"
@@ -145,6 +151,7 @@ services:
     hostname: nodemanager2
     container_name: nodemanager2
     command: [ "yarn", "nodemanager" ]
+    user: "root"
     environment:
       HADOOP_HOME: "/opt/hadoop"
       YARN_HOME: "/opt/hadoop"
@@ -166,6 +173,7 @@ services:
     hostname: nodemanager3
     container_name: nodemanager3
     command: [ "yarn", "nodemanager" ]
+    user: "root"
     environment:
       HADOOP_HOME: "/opt/hadoop"
       YARN_HOME: "/opt/hadoop"
@@ -192,6 +200,7 @@ services:
     command: [ "mapred", "historyserver" ]
     ports:
       - 19888:19888
+    user: "root"
     environment:
       HADOOP_HOME: "/opt/hadoop"
     volumes:
@@ -204,53 +213,7 @@ services:
       - big-data-network
 
 
-  # -----------------------------
-  # Kafka brokers (KRaft mode) <- w tym nowym modzie zookeper nie jest potrzebny
-  # -----------------------------
-  kafka1:
-    image: confluentinc/cp-kafka:7.5.0
-    hostname: kafka1
-    container_name: kafka1
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: 'false'
-      CLUSTER_ID: "Mhwr48ECRyiC3J6oLSOESg"
-      KAFKA_CLUSTER_ID: "Mhwr48ECRyiC3J6oLSOESg"
-    ports:
-      - 9092:9092
-    networks:
-      - big-data-network
-
-  kafka2:
-    image: confluentinc/cp-kafka:7.5.0
-    hostname: kafka2
-    container_name: kafka2
-    environment:
-      KAFKA_BROKER_ID: 2
-      KAFKA_LISTENERS: PLAINTEXT://:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092
-      KAFKA_PROCESS_ROLES: broker
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: 'false'
-      CLUSTER_ID: "Mhwr48ECRyiC3J6oLSOESg"
-      KAFKA_CLUSTER_ID: "Mhwr48ECRyiC3J6oLSOESg"
-    ports:
-      - 9093:9092
-    networks:
-      - big-data-network
-
 networks:
   big-data-network:
+    name: big-data-network
     external: true

@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   postgres:
     image: postgres:15
@@ -21,9 +19,11 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW_UID: 50000
+      # Ensure the webserver secret is identical across all Airflow components to avoid 403 when fetching served logs
+      AIRFLOW__WEBSERVER__SECRET_KEY: "replace_with_a_secure_random_value"
     entrypoint: >
       bash -c "
-      airflow db migrate &&
+      airflow db init &&
       airflow users create --username admin --password admin --firstname admin --lastname admin --role Admin --email admin@example.com
       "
     networks:
@@ -31,16 +31,21 @@ services:
 
   airflow-webserver:
     image: custom-airflow:latest
+    user: "0:0"
     depends_on:
-      - airflow-init
-      - postgres
+      airflow-init:
+        condition: service_completed_successfully
     environment:
       AIRFLOW__WEBSERVER__WEB_SERVER_PORT: 8082
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW_UID: 50000
+      # same secret key here
+      AIRFLOW__WEBSERVER__SECRET_KEY: "replace_with_a_secure_random_value"
     ports:
       - "8082:8082"
+      # expose the log fetcher port so logs can be retrieved from host (useful for local setups)
+      - "8793:8793"
     command: "airflow webserver"
     volumes:
       - ./dags:/opt/airflow/dags
@@ -50,13 +55,16 @@ services:
 
   airflow-scheduler:
     image: custom-airflow:latest
-    user: "50000:1001"
+    user: "0:0"
     depends_on:
-      - airflow-webserver
+      airflow-init:
+        condition: service_completed_successfully
     environment:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW_UID: 50000
+      # same secret key here as well
+      AIRFLOW__WEBSERVER__SECRET_KEY: "replace_with_a_secure_random_value"
     command: "airflow scheduler"
     volumes:
       - ./dags:/opt/airflow/dags

@@ -21,7 +21,6 @@
         <name>dfs.datanode.data.dir</name>
         <value>file:///hadoop/dfs/data</value>
     </property>
-
     <!-- 🔗 Adres NameNode do RPC (musi zgadzać się z core-site.xml i docker-compose) -->
     <property>
         <name>dfs.namenode.rpc-address</name>

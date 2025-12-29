@@ -13,7 +13,7 @@ class TrafficClientConfig(BaseSettings):
 
 
 class WeatherClientConfig(BaseSettings):
-    provider: str = Field(..., description="Weather provider (mock)")
+    provider: str = Field(..., description="Weather provider (mock, openweathermap)")
     api_key: str = Field(..., description="API key for weather service")
     base_url: str = Field(..., description="Base URL for weather API")
     timeout: int = Field(default=30, description="Timeout in seconds")

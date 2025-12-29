@@ -233,3 +233,4 @@ hdfs/test.sh/
 !nifi/registry-data/database/
 !nifi/registry-data/git/hdfs/namenode/current/
 ./hdfs/namenode/current/
+/hdfs/hadoop-data/namenode/in_use.lock
