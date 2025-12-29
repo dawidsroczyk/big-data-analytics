@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  hbase-zk:
+    image: zookeeper:3.8
+    container_name: hbase-zk
+    hostname: hbase-zk
+    ports:
+      - "2181:2181"
+    volumes:
+      - zk_data:/data
+      - zk_datalog:/datalog
+    networks:
+      - bigdata
+
+  hbase:
+    image: harisekhon/hbase
+    container_name: hbase
+    hostname: hbase
+    depends_on:
+      - hbase-zk
+    environment:
+      HBASE_MANAGES_ZK: "false"
+      HBASE_ZOOKEEPER_QUORUM: "hbase-zk"
+      HBASE_ZOOKEEPER_PROPERTY_CLIENTPORT: "2181"
+      HBASE_ZNODE_PARENT: "/hbase"
+      HBASE_CLUSTER_DISTRIBUTED: "false"
+    ports:
+      - "16010:16010"   # HBase Master UI
+      - "16030:16030"   # RegionServer UI
+      - "16000:16000"   # RPC
+      - "16020:16020"   # Master RPC
+    volumes:
+      - hbase_data:/hbase-data
+    networks:
+      - bigdata
+
+volumes:
+  zk_data:
+  zk_datalog:
+  hbase_data:
+
+networks:
+  bigdata:
+    name: bigdata

@@ -1,14 +1,21 @@
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / scalaVersion := "2.12.18"
 
+lazy val sparkV = "3.3.0"
+
 lazy val root = (project in file("."))
   .settings(
     name := "preprocessing-module",
 
     libraryDependencies ++= Seq(
-      "org.apache.spark" %% "spark-core" % "3.5.0",
-      "org.apache.spark" %% "spark-sql"  % "3.5.0",
-      "org.apache.spark" %% "spark-mllib" % "3.5.0"
+      "org.apache.spark" %% "spark-core"  % sparkV % "provided",
+      "org.apache.spark" %% "spark-sql"   % sparkV % "provided",
+      "org.apache.spark" %% "spark-mllib" % sparkV % "provided",
+
+      "org.apache.spark" %% "spark-sql-kafka-0-10" % sparkV,
+      "org.apache.spark" %% "spark-token-provider-kafka-0-10" % sparkV,
+
+      "org.apache.hbase" % "hbase-shaded-client" % "2.5.8"
     )
   )
 
