@@ -14,6 +14,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.Row
 import org.apache.hadoop.hbase.util.Bytes
+import streaming.schema.AvroSchemas
 
 object GoldFeaturesToHBaseJob {
 
@@ -22,9 +23,26 @@ object GoldFeaturesToHBaseJob {
     spark.sparkContext.setLogLevel("WARN")
 
     val rawWeather = KafkaReaders.readJsonTopic(spark, StreamConfig.kafkaBootstrap, "raw_weather", Schemas.weatherRaw)
-    val rawTraffic = KafkaReaders.readJsonTopic(spark, StreamConfig.kafkaBootstrap, "raw_traffic", Schemas.trafficRaw)
-    val rawAir     = KafkaReaders.readJsonTopic(spark, StreamConfig.kafkaBootstrap, "raw_air_quality", Schemas.airRaw)
-    val rawUv      = KafkaReaders.readJsonTopic(spark, StreamConfig.kafkaBootstrap, "raw_uv", Schemas.uvRaw)
+    val rawTraffic = KafkaReaders.readAvroOcfTopic(
+      spark,
+      StreamConfig.kafkaBootstrap,
+      "raw_traffic",
+      AvroSchemas.trafficAvroSchemaJson
+    )
+
+    val rawAir     = KafkaReaders.readAvroOcfTopic(
+      spark,
+      StreamConfig.kafkaBootstrap,
+      "raw_air_quality",
+      AvroSchemas.airQualityAvroSchemaJson
+    )
+
+    val rawUv      = KafkaReaders.readAvroOcfTopic(
+      spark,
+      StreamConfig.kafkaBootstrap,
+      "raw_uv",
+      AvroSchemas.uvAvroSchemaJson
+    )
 
     val weather = WeatherPreprocessor.transform(rawWeather)
       .withWatermark("event_ts", "2 hours")
@@ -89,7 +107,7 @@ object GoldFeaturesToHBaseJob {
         )
       }
       .option("checkpointLocation", chkPath)
-      .outputMode("update")
+      .outputMode("append")
       .start()
       .awaitTermination()
   }

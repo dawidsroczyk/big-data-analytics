@@ -55,7 +55,13 @@ object TrafficStreamingPreprocessor {
     val base = raw
       .withColumn("lat", locSplit.getItem(0).cast("double"))
       .withColumn("lon", trim(locSplit.getItem(1)).cast("double"))
-      .withColumn("event_ts", to_timestamp(col("updated_at"), "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"))
+      .withColumn(
+        "event_ts",
+        to_timestamp(
+          regexp_replace(col("updated_at"), "(\\.\\d{3})\\d+", "$1"),
+          "yyyy-MM-dd'T'HH:mm:ss.SSS"
+        )
+      )
       .withColumn("event_date", to_date(col("event_ts")))
       .withColumn("event_hour", hour(col("event_ts")))
       .withColumn("current_travel_time", col("current_travel_time").cast("long"))

@@ -37,8 +37,8 @@ object WeatherPreprocessor {
       .dropDuplicates("lat", "lon", "event_ts")
 
     println("=== WeatherPreprocessor: CLEANED sample ===")
-    cleaned.show(5, truncate = false)
-
+//    cleaned.show(5, truncate = false)
+//
     cleaned
   }
 }
