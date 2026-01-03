@@ -49,7 +49,7 @@ object FullPreproSafe {
     val featuresWithDate = finalFeatures
       .withColumn("event_date", to_date(col("event_ts")))
     featuresWithDate
-      .coalesce(8)   // adjust partition count according to dataset size
+      .coalesce(8) // adjust partition count according to dataset size
       .write
       .mode("overwrite")
       .partitionBy("event_date")
