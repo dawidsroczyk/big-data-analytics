@@ -4,7 +4,7 @@ import preprocessing.config.PreprocessingConfig
 import preprocessing.spark.SparkSessionBuilder
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.ml.feature.VectorAssembler
-import org.apache.spark.ml.regression.LinearRegression
+import org.apache.spark.ml.regression.RandomForestRegressor
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.functions._
 
@@ -14,12 +14,10 @@ object AqiModelTrainingJob {
     val spark: SparkSession = SparkSessionBuilder.build("AqiModelTrainingJob")
     spark.sparkContext.setLogLevel("WARN")
 
-    // Parquet/Hive read robustness
     spark.conf.set("spark.sql.parquet.enableVectorizedReader", "false")
     spark.conf.set("spark.sql.parquet.mergeSchema", "true")
     spark.conf.set("spark.sql.hive.convertMetastoreParquet", "false")
 
-    // Load GOLD parquet directly (bypass Hive SerDe)
     println("[AqiModelTrainingJob] Loading GOLD parquet directly, bypassing Hive SerDe")
     val goldPath = s"${config.goldBasePath}/air_quality_features"
     val baseDf = spark.read.option("mergeSchema", "true").parquet(goldPath)
@@ -44,7 +42,7 @@ object AqiModelTrainingJob {
     val featureCols = candidateFeatures.filter(safeDf.columns.contains)
 
     if (featureCols.nonEmpty && safeDf.columns.contains("label_aqi")) {
-      println(s"[AqiModelTrainingJob] Training LinearRegression with features: ${featureCols.mkString(", ")}")
+      println(s"[AqiModelTrainingJob] Training RandomForestRegressor with features: ${featureCols.mkString(", ")}")
 
       val trainingDf = safeDf
         .na.drop("any", Seq("label_aqi"))
@@ -56,13 +54,15 @@ object AqiModelTrainingJob {
 
       val assembled = assembler.transform(trainingDf)
 
-      val lr = new LinearRegression()
+      val rf = new RandomForestRegressor()
         .setLabelCol("label_aqi")
         .setFeaturesCol("features")
-        .setMaxIter(50)
+        .setNumTrees(100)
+        .setMaxDepth(10)
+        .setFeatureSubsetStrategy("auto")
 
-      val model = lr.fit(assembled)
-      val modelPath = s"${config.goldBasePath}/models/aqi_lr"
+      val model = rf.fit(assembled)
+      val modelPath = s"${config.goldBasePath}/models/aqi_rf"
 
       val fs = FileSystem.get(spark.sparkContext.hadoopConfiguration)
       val p  = new Path(modelPath)
@@ -70,16 +70,15 @@ object AqiModelTrainingJob {
         println(s"[AqiModelTrainingJob] Removing existing model at $modelPath")
         fs.delete(p, true)
       }
-      println(s"[AqiModelTrainingJob] Saving model to $modelPath")
+      println(s"[AqiModelTrainingJob] Saving RandomForest model to $modelPath")
       model.save(modelPath)
 
-      // Save model parameters (features order, coefficients, intercept) for Python job
+      // Save model metadata (features order, feature importances, numTrees, maxDepth)
       import spark.implicits._
-      val coeffArr = model.coefficients.toArray
-      val interceptVal = model.intercept
-      val paramsPath = s"${config.goldBasePath}/models/aqi_lr_params"
-      Seq((featureCols.toArray, coeffArr, interceptVal))
-        .toDF("features","coeffs","intercept")
+      val importances = model.featureImportances.toArray
+      val paramsPath = s"${config.goldBasePath}/models/aqi_rf_params"
+      Seq((featureCols.toArray, importances, model.getNumTrees, model.getMaxDepth))
+        .toDF("features","feature_importances","num_trees","max_depth")
         .coalesce(1)
         .write
         .mode("overwrite")

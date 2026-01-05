@@ -1,6 +1,11 @@
 import os
 import time
 
+import numpy as _np
+
+# ML imports
+from pyspark.ml.feature import VectorAssembler
+from pyspark.ml.regression import RandomForestRegressionModel
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import (
     col, lit, when, split, trim,
@@ -26,6 +31,12 @@ MONGO_COLL_LATEST = os.getenv("MONGO_COLL_LATEST", "gold_latest")
 BUCKET_UNIT = os.getenv("BUCKET_UNIT", "minute")
 GEO_PRECISION = int(os.getenv("GEO_PRECISION", "3"))
 ENABLE_DEBUG = os.getenv("ENABLE_DEBUG", "0") == "1"
+
+
+# Paths to RF model and params exported by the Scala training job
+RF_BASE = "/gold/models"
+RF_MODEL_PATH = f"{RF_BASE}/aqi_rf"
+RF_PARAMS_PATH = f"{RF_BASE}/aqi_rf_params"
 
 
 def read_kafka_json(spark, topic, schema_ddl, starting_offsets=STARTING_OFFSETS):
@@ -58,6 +69,33 @@ def with_geo(df, precision=GEO_PRECISION):
         )
     )
 
+
+# --- RF prediction helpers ---
+def load_rf_model_and_features(spark: SparkSession):
+    # params JSON produced by Scala job: features, feature_importances, num_trees, max_depth
+    params_df = spark.read.json(RF_PARAMS_PATH)
+    row = params_df.limit(1).collect()[0]
+    feature_cols = list(row["features"])
+    model = RandomForestRegressionModel.load(RF_MODEL_PATH)
+    print(f"[RF] Loaded model from {RF_MODEL_PATH} with features: {feature_cols}")
+    return model, feature_cols
+
+def ensure_feature_columns(df, feature_cols):
+    out = df
+    for f in feature_cols:
+        if f not in out.columns:
+            out = out.withColumn(f, lit(0.0))
+        else:
+            out = out.withColumn(f, col(f).cast("double"))
+    return out
+
+def add_prediction(df, model, feature_cols):
+    tmp = ensure_feature_columns(df, feature_cols)
+    assembler = VectorAssembler(inputCols=feature_cols, outputCol="features")
+    assembled = assembler.transform(tmp)
+    predicted = model.transform(assembled).withColumnRenamed("prediction", "predicted_aqi").drop("features")
+    return predicted
+# --- end RF helpers ---
 
 def dedup_by_bucket(df, ts_col="event_ts"):
     return (
@@ -292,6 +330,9 @@ def main():
     wta = attach_air(wt, air_slim)
     wtau = attach_uv(wta, uv_slim)
 
+    # Load RF model and features once per app
+    rf_model, rf_features = load_rf_model_and_features(spark)
+
     if ENABLE_DEBUG:
         debug_light(wtau, "final", ["geo_key", "event_ts", "label_aqi", "uv_index"])
 
@@ -327,16 +368,19 @@ def main():
                 .withColumn("is_congested", when(col("congestion_index") > 1.2, lit(True)).otherwise(lit(False)))
             )
 
+            # ADD PREDICTION
+            enriched_with_pred = add_prediction(enriched, rf_model, rf_features)
+
             latest = (
-                enriched
+                enriched_with_pred
                 .withColumn("rn", row_number().over(Window.partitionBy("key").orderBy(col("event_ts").desc())))
                 .filter(col("rn") == 1)
                 .drop("rn")
             )
 
-            write_history_to_mongo(enriched)
+            write_history_to_mongo(enriched_with_pred)
             write_latest_to_mongo(latest)
-            print("[Mongo] write OK")
+            print("[Mongo] write OK (with predictions)")
 
         except Exception as e:
             print("[Mongo] write FAILED:", str(e))
