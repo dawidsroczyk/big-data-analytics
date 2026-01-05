@@ -90,7 +90,7 @@ object JoinPreprocessor {
 
     val withAq = f.join(
       a,
-      expr("f.lat = a.lat AND f.lon = a.lon AND abs(f.event_ts_sec - a.event_ts_sec + 60) == 1"),
+      expr("f.lat = a.lat AND f.lon = a.lon AND abs(f.event_ts_sec - a.event_ts_sec) == 1"),
       "left"
     ).drop("event_ts_sec")
       .drop(a("lat"))
@@ -126,7 +126,7 @@ object JoinPreprocessor {
 
     val withUv = f.join(
       u,
-      expr("f.lat = u.lat AND f.lon = u.lon AND abs(f.event_ts_sec - u.event_ts_sec + 60) == 1"),
+      expr("f.lat = u.lat AND f.lon = u.lon AND abs(f.event_ts_sec - u.event_ts_sec) == 1"),
       "left"
     ).drop(u("event_ts_sec"))
       .drop(u("lat"))

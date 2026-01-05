@@ -16,7 +16,7 @@ object WeatherPreprocessor {
       .withColumn("lon", trim(locSplit.getItem(1)).cast("double"))
       .withColumn(
         "event_ts",
-        to_timestamp(col("updated_at"), "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+        to_timestamp(col("updated_at"))
       )
       .withColumn("event_date", to_date(col("event_ts")))
       .withColumn("event_hour", hour(col("event_ts")))
@@ -37,7 +37,7 @@ object WeatherPreprocessor {
       .dropDuplicates("lat", "lon", "event_ts")
 
     println("=== WeatherPreprocessor: CLEANED sample ===")
-//    cleaned.show(5, truncate = false)
+    cleaned.show(5, truncate = false)
 //
     cleaned
   }
