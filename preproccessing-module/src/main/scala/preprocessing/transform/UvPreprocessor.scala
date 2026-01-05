@@ -28,8 +28,8 @@ object UvPreprocessor {
       .filter(col("lat").isNotNull && col("lon").isNotNull)
 
     println("=== UvPreprocessor: SILVER sample ===")
-    cleaned.show(5, truncate = false)
-
+//    cleaned.show(5, truncate = false)
+//
     cleaned
   }
 }

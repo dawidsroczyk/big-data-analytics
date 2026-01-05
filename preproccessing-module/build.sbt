@@ -15,7 +15,8 @@ lazy val root = (project in file("."))
       "org.apache.spark" %% "spark-sql-kafka-0-10" % sparkV,
       "org.apache.spark" %% "spark-token-provider-kafka-0-10" % sparkV,
 
-      "org.apache.hbase" % "hbase-shaded-client" % "2.5.8"
+      "org.apache.hbase" % "hbase-shaded-client" % "2.5.8",
+      "org.apache.spark" %% "spark-avro" % sparkV,
     )
   )
 

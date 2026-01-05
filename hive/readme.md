@@ -17,6 +17,8 @@ Jak bez setupów pamięci to można
 
 `docker exec -it hive-server2 /bin/bash`
 
+`beeline`
+
 `!connect jdbc:hive2://localhost:10000`
 
 Login, haslo hive hive
