@@ -41,6 +41,7 @@ object FullPreprocessingJob {
     println(s"[FullPreprocessingJob] Saving GOLD features to: $outputPath")
 
     finalFeatures
+      .withColumn("event_date", to_date(col("event_ts")))
       .repartition(col("event_date"))
       .write
       .mode("overwrite")

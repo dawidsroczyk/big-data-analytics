@@ -14,6 +14,8 @@ object GoldHiveJob {
 
     spark.sql(s"""
       CREATE EXTERNAL TABLE IF NOT EXISTS gold.enriched_air_traffic (
+        lat DOUBLE,
+        lon DOUBLE,
         event_ts TIMESTAMP,
         event_ts_sec BIGINT,
         label_aqi DOUBLE,
