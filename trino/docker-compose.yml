@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  trino:
+    image: trinodb/trino:latest
+    container_name: trino
+    ports:
+      - "8085:8080"  # Trino Web UI
+    volumes:
+      - ./etc/catalog:/etc/trino/catalog # Tylko konektory
+      - ../hdfs/conf:/opt/hadoop/etc/hadoop  # Mount pliki Hadoop dla Hive
+    networks:
+      - big-data-network
+
+networks:
+  big-data-network:
+    external: true

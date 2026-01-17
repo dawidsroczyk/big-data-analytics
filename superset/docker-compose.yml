@@ -1,0 +1,39 @@
+services:
+  superset:
+    build: .
+    # Zmieniamy nazwę obrazu, żeby nie sugerowała, że mamy tam drivery Hive
+    image: superset
+    container_name: superset
+    restart: unless-stopped
+    ports:
+      - "9001:8088"
+    environment:
+      SUPERSET_SECRET_KEY: supersetsecretkey
+      SUPERSET_LOAD_EXAMPLES: "false"
+    volumes:
+      # Upewnij się, że plik ma nazwę superset_config.py (z podkreślnikiem)
+      - ./superset_config.py:/app/pythonpath/superset_config.py
+    depends_on:
+      - superset-db
+    networks:
+      - big-data-network
+
+  superset-db:
+    image: postgres:15
+    container_name: superset-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: superset
+      POSTGRES_USER: superset
+      POSTGRES_PASSWORD: superset
+    volumes:
+      - superset-db-data:/var/lib/postgresql/data
+    networks:
+      - big-data-network
+
+volumes:
+  superset-db-data:
+
+networks:
+  big-data-network:
+    external: true

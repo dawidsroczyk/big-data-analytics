@@ -234,3 +234,34 @@ hdfs/test.sh/
 !nifi/registry-data/git/hdfs/namenode/current/
 ./hdfs/namenode/current/
 /hdfs/hadoop-data/namenode/in_use.lock
+
+# Hadoop/HDFS data
+hdfs/hadoop-data/
+
+# NiFi Registry storage & db logs
+nifi/nifi-registry-data/
+nifi/nifi-registry-flow-storage/
+
+# Spark/Hive logs and metadata
+spark/logs/
+metastore_db/
+derby.log
+
+# Inne pliki systemowe
+.DS_Store
+*.log
+
+# Spark Checkpoints (to one wywołały błąd)
+spark/spark_checkpoints/
+
+# Dane Hadoopa/HDFS
+hdfs/hadoop-data/
+
+# Dane MongoDB (jeśli masz wolumen)
+mongo/data/
+
+# Logi i pliki tymczasowe
+*.crc
+*.log
+metastore_db/
+derby.log
