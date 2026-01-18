@@ -36,14 +36,14 @@ services:
       airflow-init:
         condition: service_completed_successfully
     environment:
-      AIRFLOW__WEBSERVER__WEB_SERVER_PORT: 8082
+      AIRFLOW__WEBSERVER__WEB_SERVER_PORT: 9000
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW_UID: 50000
       # same secret key here
       AIRFLOW__WEBSERVER__SECRET_KEY: "replace_with_a_secure_random_value"
     ports:
-      - "8082:8082"
+      - "9000:9000"
       # expose the log fetcher port so logs can be retrieved from host (useful for local setups)
       - "8793:8793"
     command: "airflow webserver"
