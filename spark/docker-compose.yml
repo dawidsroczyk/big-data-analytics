@@ -9,11 +9,11 @@ services:
     hostname: spark-master
     environment:
       - INIT_DAEMON_STEP=setup_spark
-      - SPARK_WORKER_MEMORY=4g
-      - SPARK_WORKER_CORES=4
+      # Master doesn't need much RAM, it just orchestrates
+      - SPARK_MASTER_HOST=spark-master
     ports:
-      - "8080:8080"   # Master UI
-      - "7077:7077"   # Spark RPC
+      - "8080:8080"
+      - "7077:7077"
     networks:
       - big-data-network
     volumes:
@@ -33,10 +33,15 @@ services:
     environment:
       - INIT_DAEMON_STEP=setup_spark
       - SPARK_MASTER=spark://spark-master:7077
+      # --- HEAVY DUTY CONFIG ---
+      - SPARK_WORKER_MEMORY=16g
+      - SPARK_WORKER_CORES=8
     ports:
-      - "8081:8081"   # Worker UI
+      - "8081:8081"
     networks:
       - big-data-network
+    # IMPORTANT: Increase shm_size to prevent crashes during heavy shuffles
+    shm_size: 2gb
     volumes:
       - /home/kubog/big-data-analytics/stream_preprocess:/spark/jobs
       - ./spark_checkpoints:/spark/checkpoints
