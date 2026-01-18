@@ -33,6 +33,7 @@ class OpenWeatherMapAirPollutionClient(BaseAirPollutionClient):
 
         iso_timestamp = datetime.fromtimestamp(dt, timezone.utc).isoformat() if dt else datetime.now(timezone.utc).isoformat()
 
+        now = datetime.now()
         return {
             "location": f"{lat},{lon}",
             "aqi": main.get('aqi'),
@@ -42,28 +43,8 @@ class OpenWeatherMapAirPollutionClient(BaseAirPollutionClient):
             "pm2_5": components.get('pm2_5'),
             "pm10": components.get('pm10'),
             "so2": components.get('so2'),
-            "timestamp": iso_timestamp,
-            "provider": "openweathermap"
-        }
-        if not pollution_data.get('list'):
-            raise ValueError("No pollution data in API response.")
-
-        record = pollution_data['list'][0]
-        main = record.get('main', {})
-        components = record.get('components', {})
-        dt = record.get('dt')
-
-        iso_timestamp = datetime.fromtimestamp(dt, timezone.utc).isoformat() if dt else datetime.now(timezone.utc).isoformat()
-
-        return {
-            "location": location_name,
-            "aqi": main.get('aqi'),
-            "co": components.get('co'),
-            "no2": components.get('no2'),
-            "o3": components.get('o3'),
-            "pm2_5": components.get('pm2_5'),
-            "pm10": components.get('pm10'),
-            "so2": components.get('so2'),
-            "timestamp": iso_timestamp,
+            "dt": dt,  # Added to match Mock format
+            # "timestamp": iso_timestamp,
+            "timestamp": now.isoformat(), 
             "provider": "openweathermap"
         }

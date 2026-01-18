@@ -1,8 +1,7 @@
 from typing import Dict, Any
 import httpx
 from ..base import BaseUVClient, ClientConfig
-from datetime import datetime
-
+from datetime import datetime, timezone
 
 class OpenWeatherUVClient(BaseUVClient):
     """OpenWeatherMap UV client (minimal, uses httpx)."""
@@ -23,15 +22,25 @@ class OpenWeatherUVClient(BaseUVClient):
             resp.raise_for_status()
             data = resp.json()
 
-        # OWM UVI response historically contains 'value' and 'date_iso' (legacy)
+        # Extract values with fallbacks to match Mock format (int for dt, str for timestamp)
         uv_value = data.get("value")
-        timestamp = data.get("date_iso") or data.get("date") or datetime.utcnow().isoformat()
         dt = data.get("date") or data.get("dt")
-
+        
+        if data.get("date_iso"):
+            timestamp = data.get("date_iso")
+        elif dt:
+            timestamp = datetime.fromtimestamp(dt, timezone.utc).isoformat()
+        else:
+            now = datetime.now(timezone.utc)
+            timestamp = now.isoformat()
+            dt = int(now.timestamp())
+        now = datetime.utcnow()
         return {
             "uv_index": uv_value,
             "location": f"{lat},{lng}",
-            "timestamp": timestamp,
-            "dt": dt,
+            # "timestamp": timestamp,
+            "timestamp": now.isoformat(),
+            # "dt": dt,
+            "dt": int(now.timestamp()),
             "provider": "openweathermap"
         }
