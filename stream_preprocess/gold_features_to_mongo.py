@@ -12,6 +12,7 @@ from pyspark.sql.functions import (
     to_date, hour, expr, concat_ws,
     round as sround, date_trunc
 )
+from pyspark.sql.functions import floor, unix_timestamp, timestamp_seconds
 
 # --- CONFIGURATION ---
 KAFKA_BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP", "kafka1:9092,kafka2:9092")
@@ -67,6 +68,7 @@ def with_geo(df, precision=GEO_PRECISION):
         )
     )
 
+'''
 def quick_dedup(df, ts_col="event_ts"):
     return (
         df.withColumn("bucket", date_trunc("minute", col(ts_col)))
@@ -74,13 +76,55 @@ def quick_dedup(df, ts_col="event_ts"):
           .dropDuplicates(["geo_key", "bucket"])
           .drop("bucket")
     )
+'''
+def quick_dedup(df, ts_col="event_ts"):
+    return (
+        df.withColumn("bucket", 
+            timestamp_seconds(
+                (floor(unix_timestamp(col(ts_col)) / 10) * 10).cast("long")
+            )
+        )
+        .withWatermark(ts_col, WM)
+        .dropDuplicates(["geo_key", "bucket"])
+        .drop("bucket")
+    )
 
+# --- RF prediction helpers ---
+'''
 def load_rf_model_and_features(spark: SparkSession):
     print(f"[RF] WARNING: Using DUMMY model for speed optimization.")
     return None, []
+'''
+def load_rf_model_and_features(spark: SparkSession):
+    # params JSON produced by Scala job: features, feature_importances, num_trees, max_depth
+    params_df = spark.read.json(RF_PARAMS_PATH)
+    row = params_df.limit(1).collect()[0]
+    feature_cols = list(row["features"])
+    model = RandomForestRegressionModel.load(RF_MODEL_PATH)
+    print(f"[RF] Loaded model from {RF_MODEL_PATH} with features: {feature_cols}")
+    return model, feature_cols
 
+'''
 def add_prediction(df, model, feature_cols):
     return df.withColumn("predicted_aqi", lit(-1.0))
+'''
+
+def ensure_feature_columns(df, feature_cols):
+    out = df
+    for f in feature_cols:
+        if f not in out.columns:
+            out = out.withColumn(f, lit(0.0))
+        else:
+            out = out.withColumn(f, col(f).cast("double"))
+    return out
+
+def add_prediction(df, model, feature_cols):
+    tmp = ensure_feature_columns(df, feature_cols)
+    assembler = VectorAssembler(inputCols=feature_cols, outputCol="features")
+    assembled = assembler.transform(tmp)
+    predicted = model.transform(assembled).withColumnRenamed("prediction", "predicted_aqi").drop("features")
+    return predicted
+# --- end RF helpers -
 
 # --- PREPROCESSING ---
 def weather_preprocess(raw):
