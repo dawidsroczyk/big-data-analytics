@@ -32,15 +32,30 @@ object FullPreproSafe {
     val airSilver     = spark.read.parquet(airPath)
     val uvSilver      = spark.read.parquet(uvPath)
 
+    println(s"weatherSilver COUNT = ${weatherSilver.count()}")
+    println(s"trafficSilver COUNT = ${trafficSilver.count()}")
+    println(s"airSilver COUNT = ${airSilver.count()}")
+    println(s"uvSilver COUNT = ${uvSilver.count()}")
+
+
     // Join weather + traffic
     val features = JoinPreprocessor.joinWeatherTraffic(weatherSilver, trafficSilver)
 
+    println(s"features (weather+traffic) COUNT = ${features.count()}")
+
     // Broadcast small datasets to avoid shuffle (air + uv)
     val featuresWithAQ = JoinPreprocessor.attachAirQuality(features, broadcast(airSilver))
+
+    println(s"featuresWithAQ COUNT = ${featuresWithAQ.count()}")
+
     val featuresWithAQUv = JoinPreprocessor.attachUv(featuresWithAQ, broadcast(uvSilver))
+
+    println(s"featuresWithAQUv COUNT = ${featuresWithAQUv.count()}")
 
     // Feature engineering
     val finalFeatures = FeatureEngineeringPreprocessor.enrich(featuresWithAQUv.dropDuplicates("lat", "lon", "event_ts"))
+
+    println(s"finalFeatures COUNT = ${finalFeatures.count()}")
 
     val outputPath = s"${config.goldBasePath}/air_quality_features"
     println(s"[FullPreprocessingJob] Saving GOLD features to: $outputPath")

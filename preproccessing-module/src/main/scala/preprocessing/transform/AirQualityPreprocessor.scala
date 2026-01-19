@@ -20,7 +20,7 @@ object AirQualityPreprocessor {
       )
       .withColumn("event_date", to_date(col("event_ts")))
       .withColumn("event_hour", hour(col("event_ts")))
-      .withColumn("aqi",  col("aqi").cast("double"))
+      .withColumn("aqi",  col("aqi").cast("int"))
       .withColumn("pm25", col("pm2_5").cast("double"))
       .withColumn("pm10", col("pm10").cast("double"))
       .withColumn("no2",  col("no2").cast("double"))

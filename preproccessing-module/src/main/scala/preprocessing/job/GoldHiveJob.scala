@@ -44,6 +44,16 @@ object GoldHiveJob {
 
     spark.sql("MSCK REPAIR TABLE gold.enriched_air_traffic")
 
+    spark.sql("""
+  SELECT COUNT(*) AS cnt FROM gold.enriched_air_traffic
+""").show(false)
+
+    spark.sql("""
+  SHOW PARTITIONS gold.enriched_air_traffic
+""").show(false)
+
+
+
     println("FINISHED")
 
     spark.stop()

@@ -38,6 +38,15 @@ object SilverHiveJob {
     """)
     spark.sql("MSCK REPAIR TABLE silver.air_quality_clean")
 
+    spark.sql("""
+  SELECT COUNT(*) AS cnt FROM silver.air_quality_clean
+""").show(false)
+
+    spark.sql("""
+  SHOW PARTITIONS silver.air_quality_clean
+""").show(false)
+
+
     println("Gathering silver.traffic_clean data")
     spark.sql(s"""
       CREATE EXTERNAL TABLE IF NOT EXISTS silver.traffic_clean (
@@ -65,6 +74,15 @@ object SilverHiveJob {
 
     spark.sql("MSCK REPAIR TABLE silver.traffic_clean")
 
+    spark.sql("""
+  SELECT COUNT(*) AS cnt FROM silver.traffic_clean
+""").show(false)
+
+    spark.sql("""
+  SHOW PARTITIONS silver.traffic_clean
+""").show(false)
+
+
     println("Gathering silver.weather_clean data")
     spark.sql(s"""
       CREATE EXTERNAL TABLE IF NOT EXISTS silver.weather_clean (
@@ -87,6 +105,15 @@ object SilverHiveJob {
 
     spark.sql("MSCK REPAIR TABLE silver.weather_clean")
 
+    spark.sql("""
+  SELECT COUNT(*) AS cnt FROM silver.weather_clean
+""").show(false)
+
+    spark.sql("""
+  SHOW PARTITIONS silver.weather_clean
+""").show(false)
+
+
     println("Hive - Gathering silver.uv_clean data")
     spark.sql(s"""
       CREATE EXTERNAL TABLE IF NOT EXISTS silver.uv_clean (
@@ -105,6 +132,16 @@ object SilverHiveJob {
     """)
 
     spark.sql("MSCK REPAIR TABLE silver.uv_clean")
+
+    spark.sql("""
+  SELECT COUNT(*) AS cnt FROM silver.uv_clean
+""").show(false)
+
+    spark.sql("""
+  SHOW PARTITIONS silver.uv_clean
+""").show(false)
+
+
 
     println("FINISHED")
 
