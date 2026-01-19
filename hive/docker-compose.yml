@@ -59,6 +59,16 @@ services:
     networks:
       - big-data-network
 
+  trino:
+    image: trinodb/trino:435
+    container_name: trino
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./trino/etc:/etc/trino
+    networks:
+      - big-data-network
+
 volumes:
   hive-metastore-db-volume:
 

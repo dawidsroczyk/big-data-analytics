@@ -31,4 +31,3 @@ volumes:
 
 networks:
   big-data-network:
-    external: true
