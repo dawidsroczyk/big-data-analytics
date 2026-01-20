@@ -26,26 +26,27 @@ with DAG(
         bash_command=r"""
         docker exec spark-master bash -lc '
           set -euo pipefail
+          
+          TARGET="gold_features_to_mongo\.py"
 
-          pids=$(pgrep -f "spark-submit.*gold_features_to_mongo\.py" || true)
+          pids=$(pgrep -f "$TARGET" || true)
 
           if [ -n "$pids" ]; then
-            echo "Stopping stream PIDs: $pids"
+            echo "Found running stream with PIDs: $pids. Stopping..."
             kill -TERM $pids || true
             sleep 10
 
-            still=$(pgrep -f "spark-submit.*gold_features_to_mongo\.py" || true)
+            still=$(pgrep -f "$TARGET" || true)
             if [ -n "$still" ]; then
-              echo "Still running, forcing kill: $still"
+              echo "Stream still running, forcing kill: $still"
               kill -KILL $still || true
             fi
           else
-            echo "No stream process found"
+            echo "No existing stream process found (safe to proceed)"
           fi
         '
         """
     )
-
 
     start_stream = BashOperator(
         task_id="start_stream",
@@ -53,6 +54,10 @@ with DAG(
         docker exec -d spark-master bash -lc '
           nohup /spark/bin/spark-submit \
             --master spark://spark-master:7077 \
+            --driver-memory 4G \
+            --executor-memory 4G \
+            --conf spark.cores.max=4 \
+            --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0,org.apache.spark:spark-token-provider-kafka-0-10_2.12:3.3.0,org.mongodb.spark:mongo-spark-connector_2.12:10.3.0 \
             /spark/jobs/gold_features_to_mongo.py \
             > /tmp/gold_stream.out 2>&1 &
         '
